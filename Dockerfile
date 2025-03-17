@@ -10,6 +10,8 @@ RUN pnpm install
 
 COPY . .
 
+RUN pnpm config set allow-build-scripts true && pnpm install
+
 # RUN pnpm run build
 RUN pnpm run build && ls -la /app
 
