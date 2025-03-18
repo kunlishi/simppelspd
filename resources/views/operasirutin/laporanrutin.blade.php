@@ -359,7 +359,9 @@
                                     {{-- <td class="px-6 py-4 text-center">{{ $row->tingkat }}</td> --}}
                                     <td class="px-4 py-3">{{ $row->pelanggaran }}</td>
                                     <td class="px-4 py-3">{{ $row->nama_pencatat }}</td>
-                                    @if (Auth::user()->role == 'spd' && \App\Models\SPD::where('nas', Auth::user()->username)->value('nama_anggota'))
+                                    @if (Auth::user()->role == 'spd' &&
+                                            trim(\App\Models\SPD::where('nas', Auth::user()->username)->value('nama_anggota')) ===
+                                                trim($row->nama_pencatat))
                                         <td class="py-5 flex items-center justify-center space-x-2">
                                             <!-- Edit Button -->
                                             <a href="{{ route('catatedit', $row->id) }}"
