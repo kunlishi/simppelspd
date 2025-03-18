@@ -26,7 +26,10 @@ COPY --from=build /app/package.json .
 COPY --from=build /app/pnpm-lock.yaml .
 
 # Install Vite sebelum instalasi production dependencies
-RUN pnpm add vite
+# RUN pnpm add vite
+
+# Install semua dependencies tanpa menghapus Vite
+RUN pnpm install --frozen-lockfile
 
 RUN pnpm install --prod
 
