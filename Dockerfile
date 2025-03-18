@@ -8,6 +8,9 @@ COPY package-lock.json .
 # COPY pnpm-lock.yaml .
 RUN pnpm install
 
+# Install Vite
+RUN pnpm add vite
+
 COPY . .
 
 RUN pnpm config set allow-build-scripts true && pnpm install
