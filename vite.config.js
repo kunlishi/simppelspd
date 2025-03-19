@@ -9,7 +9,7 @@ export default defineConfig({
         }),
     ],
     build: {
-        outDir: "./dist",
+        outDir: "./public/build",
     },
     preview: {
         allowedHosts: ["simppelspd-dev.student.stis.ac.id"],

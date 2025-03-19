@@ -25,20 +25,30 @@ COPY . .
 RUN touch database/database.sqlite
 RUN composer install
 
-FROM node:alpine3.19 AS deploy
+FROM node:alpine3.19 AS node-install
 
 WORKDIR /app
 RUN npm install -g pnpm
 
-COPY --from=build /app/public ./public
 COPY --from=build /app/package.json .
 COPY --from=build /app/pnpm-lock.yaml .
-COPY --from=build /app/vite.config.js .
-COPY --from=build /app/dist ./dist
-COPY --from=composer-install /var/www/html/vendor ./vendor
 
 # Install semua dependencies tanpa menghapus Vite
 RUN pnpm install --frozen-lockfile
 RUN pnpm install --prod
 
-CMD ["pnpm", "run", "start"]
+FROM shinsenter/frankenphp AS deploy
+
+WORKDIR /var/www/html
+RUN install-php-extensions \
+	pdo_mysql \
+	gd \
+	intl \
+	zip \
+	opcache
+
+COPY --from=build /app/public ./public
+COPY --from=composer-install /var/www/html/vendor ./vendor
+COPY . .
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
