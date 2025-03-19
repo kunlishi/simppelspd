@@ -51,6 +51,5 @@ COPY --from=build /app/public ./public
 COPY --from=composer-install /var/www/html/vendor ./vendor
 COPY . .
 RUN touch database/database.sqlite
-RUN php artisan migrate
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
