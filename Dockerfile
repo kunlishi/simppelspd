@@ -22,6 +22,7 @@ RUN install-php-extensions \
 	zip \
 	opcache
 COPY . .
+RUN touch database/database.sqlite
 RUN composer install
 
 FROM node:alpine3.19 AS deploy
