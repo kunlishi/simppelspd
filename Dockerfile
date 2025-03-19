@@ -52,4 +52,4 @@ COPY --from=composer-install /var/www/html/vendor ./vendor
 COPY . .
 RUN touch database/database.sqlite
 
-CMD ["php", "artisan", "key:generate", "&&", "php", "artisan", "serve", "--host=0.0.0.0"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
