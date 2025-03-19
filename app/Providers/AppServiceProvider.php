@@ -26,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if(config('app.env') === 'production') {
+            \URL::forceScheme('https');
+        }
+        
         // Daftarkan file routes/api.php
         Route::prefix('api') // Prefix 'api' untuk semua route di api.php
             ->middleware('api') // Middleware default untuk API Laravel
