@@ -293,9 +293,6 @@
                     src="img/galeri/image (13).jpg" alt="Image 12">
             </div>
         </div>
-
-
-
     </div>
 </div>
 
