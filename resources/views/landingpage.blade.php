@@ -290,7 +290,7 @@
             </div>
             <div>
                 <img class="w-full h-48 object-cover rounded-lg transition-all duration-300 cursor-pointer filter grayscale hover:grayscale-0"
-                    src="img/galeri/image (13).jpg" alt="Image 12">
+                    src="img/galeri/image (8).jpg" alt="Image 12">
             </div>
         </div>
     </div>
