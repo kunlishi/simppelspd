@@ -12,6 +12,6 @@ export default defineConfig({
         outDir: "./dist",
     },
     preview: {
-        allowedHosts: ["*"],
+        allowedHosts: ["simppelspd-dev.student.stis.ac.id"],
     },
 });
