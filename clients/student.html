@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Mahasiswa - Presensi & Izin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 24px auto; padding: 0 12px; }
+    fieldset { margin-bottom: 16px; }
+    input, select { padding: 6px; margin: 4px 0; width: 100%; }
+    button { padding: 8px 12px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Portal Mahasiswa</h1>
+  <script src="./common.js"></script>
+
+  <fieldset>
+    <legend>Registrasi</legend>
+    <div class="row">
+      <div>
+        <label>Nama</label>
+        <input id="reg_name" />
+      </div>
+      <div>
+        <label>Email</label>
+        <input id="reg_email" type="email" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Password</label>
+        <input id="reg_password" type="password" />
+      </div>
+      <div>
+        <label>NIM</label>
+        <input id="reg_nim" />
+      </div>
+    </div>
+    <button onclick="register()">Daftar Mahasiswa</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Login</legend>
+    <div class="row">
+      <div>
+        <label>Email</label>
+        <input id="login_email" type="email" />
+      </div>
+      <div>
+        <label>Password</label>
+        <input id="login_password" type="password" />
+      </div>
+    </div>
+    <button onclick="login()">Login</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Profil</legend>
+    <button onclick="loadMe()">Muat Profil</button>
+    <div id="me"></div>
+    <h4>Edit Profil</h4>
+    <label>Nama</label>
+    <input id="upd_name" />
+    <label>Email</label>
+    <input id="upd_email" />
+    <button onclick="updateProfile()">Simpan</button>
+    <h4>Ganti Password</h4>
+    <label>Password Lama</label>
+    <input id="old_pass" type="password" />
+    <label>Password Baru</label>
+    <input id="new_pass" type="password" />
+    <button onclick="changePassword()">Ganti</button>
+    <h4>Hapus Akun</h4>
+    <button onclick="deleteAccount()">Hapus</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Pengajuan Izin/Sakit</legend>
+    <label>Jenis</label>
+    <select id="permit_type">
+      <option value="SICK">SICK</option>
+      <option value="PERMIT">PERMIT</option>
+    </select>
+    <label>Alasan</label>
+    <input id="permit_reason" />
+    <label>Foto Bukti</label>
+    <input id="permit_file" type="file" />
+    <button onclick="createPermit()">Ajukan</button>
+    <h4>Pengajuan Saya</h4>
+    <button onclick="loadMyPermits()">Muat Pengajuan</button>
+    <div id="permits"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Presensi Saya</legend>
+    <button onclick="loadMyAttendance()">Muat Presensi</button>
+    <div id="attendance"></div>
+  </fieldset>
+
+  <script>
+    function show(msg) { alert(msg); }
+
+    async function register() {
+      const body = {
+        name: document.getElementById('reg_name').value,
+        email: document.getElementById('reg_email').value,
+        password: document.getElementById('reg_password').value,
+        nim: document.getElementById('reg_nim').value,
+      };
+      const res = await api('/api/auth/register-student', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('Registrasi sukses');
+    }
+    async function login() {
+      const body = {
+        email: document.getElementById('login_email').value,
+        password: document.getElementById('login_password').value,
+      };
+      const res = await api('/api/auth/login', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('Login sukses');
+    }
+    async function loadMe() {
+      const res = await api('/api/user/me');
+      document.getElementById('me').textContent = JSON.stringify(res, null, 2);
+      document.getElementById('upd_name').value = res.name;
+      document.getElementById('upd_email').value = res.email;
+    }
+    async function updateProfile() {
+      const body = { name: document.getElementById('upd_name').value, email: document.getElementById('upd_email').value };
+      const res = await api('/api/user/me', { method: 'PUT', body: JSON.stringify(body) });
+      show('Profil diperbarui');
+    }
+    async function changePassword() {
+      const body = { oldPassword: document.getElementById('old_pass').value, newPassword: document.getElementById('new_pass').value };
+      await api('/api/user/change-password', { method: 'POST', body: JSON.stringify(body) });
+      show('Password diganti');
+    }
+    async function deleteAccount() {
+      await api('/api/user/me', { method: 'DELETE' });
+      show('Akun dihapus');
+    }
+    async function createPermit() {
+      const fd = new FormData();
+      const data = {
+        type: document.getElementById('permit_type').value,
+        reason: document.getElementById('permit_reason').value,
+      };
+      fd.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+      const file = document.getElementById('permit_file').files[0];
+      if (file) fd.append('file', file);
+      const res = await fetch(API_BASE + '/api/permit/create', { method: 'POST', headers: authHeaders(), body: fd });
+      if (!res.ok) { show('Gagal mengajukan'); return; }
+      show('Pengajuan dibuat');
+    }
+    async function loadMyPermits() {
+      const res = await api('/api/permit/my');
+      document.getElementById('permits').textContent = JSON.stringify(res, null, 2);
+    }
+    async function loadMyAttendance() {
+      const res = await api('/api/attendance/my');
+      document.getElementById('attendance').textContent = JSON.stringify(res, null, 2);
+    }
+  </script>
+</body>
+</html>

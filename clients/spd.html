@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>SPD - Scan Presensi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 24px auto; padding: 0 12px; }
+    input { padding: 8px; width: 100%; }
+    button { padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <h1>SPD Scan</h1>
+  <script src="./common.js"></script>
+
+  <fieldset>
+    <legend>Registrasi SPD</legend>
+    <label>Nama</label>
+    <input id="name" />
+    <label>Email</label>
+    <input id="email" type="email" />
+    <label>Password</label>
+    <input id="password" type="password" />
+    <button onclick="register()">Daftar SPD</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Login</legend>
+    <label>Email</label>
+    <input id="lemail" type="email" />
+    <label>Password</label>
+    <input id="lpassword" type="password" />
+    <button onclick="login()">Login</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Scan NIM</legend>
+    <p>Masukkan NIM hasil scan QR (simulasi):</p>
+    <input id="nim" />
+    <button onclick="scan()">Kirim</button>
+  </fieldset>
+
+  <script>
+    function show(m){ alert(m); }
+    async function register(){
+      const body = { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value };
+      const res = await api('/api/auth/register-spd', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('SPD terdaftar');
+    }
+    async function login(){
+      const body = { email: document.getElementById('lemail').value, password: document.getElementById('lpassword').value };
+      const res = await api('/api/auth/login', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('Login sukses');
+    }
+    async function scan(){
+      const body = { nim: document.getElementById('nim').value };
+      const res = await api('/api/attendance/scan', { method: 'POST', body: JSON.stringify(body) });
+      show('Tercatat: ' + JSON.stringify(res));
+    }
+  </script>
+</body>
+</html>
