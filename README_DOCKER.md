@@ -139,12 +139,74 @@ docker exec -it simppe-spd php artisan migrate
 # Jalankan seeder sesuai kebutuhan
 ```
 
+### Menggunakan MySQL sebagai Database
+Anda bisa memakai MySQL alih-alih SQLite. Tambahkan service MySQL pada Compose dan ubah konfigurasi `.env`.
+
+1) Ubah `.env` untuk MySQL:
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=simppe
+DB_USERNAME=simppe
+DB_PASSWORD=secret
+```
+
+2) Gunakan `docker-compose.override.yml` dengan service MySQL (gantikan override sebelumnya jika memakai SQLite):
+```yaml
+services:
+  app:
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.env:/var/www/html/.env:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: simppe
+      MYSQL_USER: simppe
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootsecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "3306:3306"  # opsional, jika butuh akses dari host
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+```
+
+3) Jalankan layanan dan inisialisasi:
+```bash
+docker compose up -d --build
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate
+# opsional: seeding
+docker compose exec app php artisan db:seed --class=AdminSeeder
+```
+
+Catatan:
+- Pastikan variabel `.env` sesuai dengan nilai di Compose (`DB_HOST=mysql`).
+- Hilangkan volume SQLite dari override jika beralih ke MySQL.
+
 ### Catatan
 - Image final menjalankan `php artisan serve --host=0.0.0.0` pada port `8000`.
 - Build aset frontend dilakukan di dalam Dockerfile; Anda tidak perlu menjalankan `npm/pnpm` di host.
-- Menggunakan SQLite memudahkan setup lokal. Untuk MySQL/pgsql, sesuaikan `.env` dan tambahkan service DB pada Compose.
+- Menggunakan SQLite memudahkan setup lokal. Untuk MySQL/pgsql, sesuaikan `.env` dan tambahkan service DB pada Compose (lihat bagian MySQL di atas).
 
 ### Troubleshooting
 - Port 8000 sudah dipakai: ubah mapping ke `"8080:8000"` pada Compose/run, lalu akses `http://localhost:8080`.
 - Permission SQLite: pastikan file `database/database.sqlite` ada dan bisa ditulis. Jika perlu di Linux/Mac: `chmod 664 database/database.sqlite` atau `chown $USER database/database.sqlite`.
 - Perubahan .env tidak terbaca: restart container `docker compose restart app`.
+ - Error koneksi DB (SQLSTATE[HY000] [2002]): pastikan service `mysql` healthy, lalu ulangi `php artisan migrate`.
