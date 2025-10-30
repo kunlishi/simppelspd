@@ -210,3 +210,64 @@ Catatan:
 - Permission SQLite: pastikan file `database/database.sqlite` ada dan bisa ditulis. Jika perlu di Linux/Mac: `chmod 664 database/database.sqlite` atau `chown $USER database/database.sqlite`.
 - Perubahan .env tidak terbaca: restart container `docker compose restart app`.
  - Error koneksi DB (SQLSTATE[HY000] [2002]): pastikan service `mysql` healthy, lalu ulangi `php artisan migrate`.
+
+### Menjalankan Test (Lokal)
+Anda bisa menjalankan test baik melalui Docker maupun langsung di host (jika Composer/PHP terpasang).
+
+1) Siapkan environment testing dengan `.env.testing` (disarankan SQLite in-memory agar cepat):
+```dotenv
+APP_ENV=testing
+APP_DEBUG=true
+
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
+
+CACHE_STORE=array
+SESSION_DRIVER=array
+QUEUE_CONNECTION=sync
+```
+
+2) Jalankan test dengan Docker (disarankan):
+```bash
+docker compose exec app php artisan test
+# atau langsung phpunit
+docker compose exec app ./vendor/bin/phpunit
+```
+
+3) Alternatif (tanpa Docker, di host):
+```bash
+composer install
+php -v # pastikan PHP versi kompatibel Laravel
+cp .env .env.testing # lalu edit seperti di atas
+php artisan key:generate --env=testing
+php artisan test
+# atau
+./vendor/bin/phpunit
+```
+
+4) Menjalankan subset test:
+```bash
+# hanya Unit
+docker compose exec app php artisan test --testsuite=Unit
+# hanya Feature
+docker compose exec app php artisan test --testsuite=Feature
+```
+
+Opsional: Testing memakai MySQL
+- Buat DB khusus testing dan konfigurasi di `.env.testing`:
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=simppe_test
+DB_USERNAME=simppe
+DB_PASSWORD=secret
+```
+```bash
+# buat database test (sekali)
+docker compose exec mysql mysql -uroot -prootsecret -e "CREATE DATABASE IF NOT EXISTS simppe_test;"
+# jalankan migrasi untuk environment testing
+docker compose exec app php artisan migrate --env=testing
+# jalankan test
+docker compose exec app php artisan test
+```
