@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mahasiswa - Presensi & Perizinan</title>
+  <style>
+    body { font-family: sans-serif; max-width: 720px; margin: 24px auto; }
+    input, select, button { padding: 8px; margin: 4px 0; }
+    .card { border: 1px solid #ddd; padding: 16px; margin: 16px 0; border-radius: 8px; }
+    pre { background: #f7f7f7; padding: 8px; }
+  </style>
+</head>
+<body>
+<h2>Mahasiswa</h2>
+<div class="card">
+  <h3>Login</h3>
+  <input id="stu-username" placeholder="Username (NIM)" />
+  <input id="stu-password" placeholder="Password" type="password" />
+  <button onclick="stuLogin()">Login</button>
+  <div>Token: <code id="stu-token"></code></div>
+</div>
+
+<div class="card">
+  <h3>Profil</h3>
+  <button onclick="getProfile()">Lihat Profil</button>
+  <pre id="profile"></pre>
+
+  <h4>Update Profil</h4>
+  <input id="fullName" placeholder="Nama Lengkap" />
+  <input id="kelas" placeholder="Kelas" />
+  <input id="email" placeholder="Email" />
+  <button onclick="updateProfile()">Simpan</button>
+</div>
+
+<div class="card">
+  <h3>Riwayat Presensi</h3>
+  <button onclick="getAttendance()">Lihat Presensi</button>
+  <pre id="attendance"></pre>
+</div>
+
+<div class="card">
+  <h3>Ajukan Izin/Sakit</h3>
+  <label>Tanggal</label>
+  <input id="forDate" type="date" />
+  <label>Jenis</label>
+  <select id="type">
+    <option value="IZIN">IZIN</option>
+    <option value="SAKIT">SAKIT</option>
+  </select>
+  <label>Alasan</label>
+  <input id="reason" />
+  <label>Bukti</label>
+  <input id="proof" type="file" />
+  <button onclick="submitPermit()">Kirim</button>
+  <pre id="permit-res"></pre>
+
+  <h4>Daftar Pengajuan Saya</h4>
+  <button onclick="myPermits()">Refresh</button>
+  <pre id="permits"></pre>
+</div>
+
+<script>
+const API = location.origin + '/api';
+let token = '';
+
+async function stuLogin(){
+  const username = document.getElementById('stu-username').value;
+  const password = document.getElementById('stu-password').value;
+  const res = await fetch(API + '/auth/login', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username, password})
+  });
+  const data = await res.json();
+  token = data.token || '';
+  document.getElementById('stu-token').innerText = token.slice(0, 16) + (token? '...' : '');
+}
+
+async function getProfile(){
+  const res = await fetch(API + '/user/me', { headers: { 'Authorization': 'Bearer ' + token } });
+  document.getElementById('profile').innerText = JSON.stringify(await res.json(), null, 2);
+}
+
+async function updateProfile(){
+  const body = {
+    fullName: document.getElementById('fullName').value || null,
+    kelas: document.getElementById('kelas').value || null,
+    email: document.getElementById('email').value || null
+  };
+  const res = await fetch(API + '/user/profile', {
+    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  document.getElementById('profile').innerText = JSON.stringify(await res.json(), null, 2);
+}
+
+async function getAttendance(){
+  const res = await fetch(API + '/attendance/me', { headers: { 'Authorization': 'Bearer ' + token } });
+  document.getElementById('attendance').innerText = JSON.stringify(await res.json(), null, 2);
+}
+
+async function submitPermit(){
+  const form = new FormData();
+  form.append('forDate', document.getElementById('forDate').value);
+  form.append('type', document.getElementById('type').value);
+  form.append('reason', document.getElementById('reason').value);
+  const file = document.getElementById('proof').files[0];
+  if (file) form.append('proof', file);
+  const res = await fetch(API + '/permits', {
+    method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: form
+  });
+  document.getElementById('permit-res').innerText = JSON.stringify(await res.json(), null, 2);
+}
+
+async function myPermits(){
+  const res = await fetch(API + '/permits', { headers: { 'Authorization': 'Bearer ' + token } });
+  document.getElementById('permits').innerText = JSON.stringify(await res.json(), null, 2);
+}
+</script>
+</body>
+</html>
