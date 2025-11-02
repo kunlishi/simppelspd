@@ -32,6 +32,7 @@ FROM php-base AS vendor
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY composer.json composer.lock artisan ./
+COPY .env.example .env.example
 COPY app ./app
 COPY bootstrap ./bootstrap
 COPY config ./config
@@ -41,7 +42,7 @@ COPY resources ./resources
 COPY routes ./routes
 COPY storage ./storage
 
-RUN mkdir -p database && touch database/database.sqlite
+RUN cp .env.example .env
 
 RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
 
