@@ -42,7 +42,8 @@ COPY resources ./resources
 COPY routes ./routes
 COPY storage ./storage
 
-RUN cp .env.example .env
+# Gunakan environment lokal agar artisan tidak mencoba menghubungi MySQL saat build
+RUN cp .env.example .env && sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
 
 RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
 
@@ -53,6 +54,8 @@ WORKDIR /var/www/html
 COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
 COPY --from=frontend /app/public/build ./public/build
+
+RUN sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env.example
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
