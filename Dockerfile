@@ -41,6 +41,8 @@ COPY resources ./resources
 COPY routes ./routes
 COPY storage ./storage
 
+RUN mkdir -p database && touch database/database.sqlite
+
 RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
 
 FROM php-base AS runtime
