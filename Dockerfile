@@ -1,55 +1,49 @@
-FROM node:alpine3.19 AS build
+FROM node:20-alpine AS frontend
 
 WORKDIR /app
-RUN npm install -g pnpm
 
-COPY package.json .
-COPY pnpm-lock.yaml .
-RUN pnpm install
+RUN corepack enable
 
-COPY . .
-
-RUN pnpm config set allow-build-scripts true && pnpm install
-RUN pnpm run build
-
-FROM shinsenter/frankenphp AS composer-install
-WORKDIR /var/www/html
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-RUN install-php-extensions \
-	pdo_mysql \
-	gd \
-	intl \
-	zip \
-	opcache
-COPY . .
-RUN touch database/database.sqlite
-RUN composer install
-
-FROM node:alpine3.19 AS node-install
-
-WORKDIR /app
-RUN npm install -g pnpm
-
-COPY --from=build /app/package.json .
-COPY --from=build /app/pnpm-lock.yaml .
-
-# Install semua dependencies tanpa menghapus Vite
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
-RUN pnpm install --prod
 
-FROM shinsenter/frankenphp AS deploy
+COPY resources ./resources
+COPY postcss.config.js tailwind.config.js vite.config.js ./
+RUN pnpm build
+
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
+
+COPY . .
+
+FROM php:8.3-fpm-bookworm AS runtime
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    libicu-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql gd intl zip opcache \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
-RUN install-php-extensions \
-	pdo_mysql \
-	gd \
-	intl \
-	zip \
-	opcache
 
-COPY --from=build /app/public ./public
-COPY --from=composer-install /var/www/html/vendor ./vendor
-COPY . .
-RUN touch database/database.sqlite
+COPY --from=vendor /app /var/www/html
+COPY --from=frontend /app/public/build /var/www/html/public/build
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
