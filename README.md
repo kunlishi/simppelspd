@@ -35,6 +35,28 @@ php artisan db:seed --class=PemonitorSeeder
 php artisan db:seed --class=SPDSeeder
 ```
 
+## Menjalankan dengan Docker
+Lingkungan Docker menyediakan stack lengkap berisi PHP-FPM, Nginx dengan SSL, MySQL, dan phpMyAdmin.
+
+1. Salin file environment kemudian sesuaikan kredensial bila perlu:
+   ```bash
+   cp .env.example .env
+   ```
+2. Bangun dan jalankan seluruh layanan:
+   ```bash
+   docker compose up --build -d
+   ```
+3. Hasilkan `APP_KEY`, jalankan migrasi, dan seed data dari dalam kontainer aplikasi:
+   ```bash
+   docker compose exec app php artisan key:generate
+   docker compose exec app php artisan migrate --seed
+   ```
+4. Akses aplikasi di `https://localhost:8443` (HTTP dialihkan otomatis ke HTTPS). Sertifikat yang dibuat bersifat self-signed; tambahkan pengecualian di browser atau override nama domain dengan mengubah variabel `SSL_CERT_CN` dan menambahkan entri ke `/etc/hosts` bila diperlukan.
+5. phpMyAdmin tersedia di `http://localhost:8081`, gunakan kredensial yang sama dengan database (`laravel`/`secret` secara bawaan).
+6. MySQL diekspos di port host `33060` sehingga dapat dihubungi oleh klien eksternal bila dibutuhkan.
+
+Perintah tambahan dapat dijalankan dengan `docker compose exec app <perintah>` (misalnya untuk queue worker atau kompilasi aset tambahan).
+
 ## Struktur Proyek
 ### Folder app
 Struktur folder app digunakan untuk mengelola logika aplikasi. Folder ini terdiri dari banyak-banyak folder di dalamnya dengan fungsi masing-masing. Berikut merupakan penjelasan singkat folder di dalamnya.
