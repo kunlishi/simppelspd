@@ -11,19 +11,7 @@ COPY resources ./resources
 COPY postcss.config.js tailwind.config.js vite.config.js ./
 RUN pnpm build
 
-FROM composer:2 AS vendor
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
-
-COPY . .
-
-FROM php:8.3-fpm-bookworm AS runtime
-
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+FROM php:8.3-fpm-bookworm AS php-base
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -39,8 +27,29 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /var/www/html
 
-COPY --from=vendor /app /var/www/html
-COPY --from=frontend /app/public/build /var/www/html/public/build
+FROM php-base AS vendor
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY composer.json composer.lock artisan ./
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY database ./database
+COPY public ./public
+COPY resources ./resources
+COPY routes ./routes
+COPY storage ./storage
+
+RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
+
+FROM php-base AS runtime
+
+WORKDIR /var/www/html
+
+COPY --from=vendor /var/www/html/vendor ./vendor
+COPY . .
+COPY --from=frontend /app/public/build ./public/build
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
