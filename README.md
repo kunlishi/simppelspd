@@ -52,10 +52,24 @@ Lingkungan Docker menyediakan stack lengkap berisi PHP-FPM, Nginx dengan SSL, My
    docker compose exec app php artisan migrate --seed
    ```
 4. Akses aplikasi di `https://localhost:8443` (HTTP dialihkan otomatis ke HTTPS). Sertifikat yang dibuat bersifat self-signed; tambahkan pengecualian di browser atau override nama domain dengan mengubah variabel `SSL_CERT_CN` dan menambahkan entri ke `/etc/hosts` bila diperlukan.
-5. phpMyAdmin tersedia di `http://localhost:8081`, gunakan kredensial yang sama dengan database (`laravel`/`secret` secara bawaan).
+5. phpMyAdmin tersedia di `http://localhost:8088`, gunakan kredensial yang sama dengan database (`laravel`/`secret` secara bawaan).
 6. MySQL diekspos di port host `33060` sehingga dapat dihubungi oleh klien eksternal bila dibutuhkan.
 
 Perintah tambahan dapat dijalankan dengan `docker compose exec app <perintah>` (misalnya untuk queue worker atau kompilasi aset tambahan).
+
+### Sertifikat & HTTPS
+- Kontainer `web` membuat sertifikat self-signed otomatis di `/etc/nginx/ssl`. Untuk menyalin sertifikat ke host (misal agar bisa di-trust secara manual), jalankan:
+  ```bash
+  docker compose cp web:/etc/nginx/ssl/server.crt ./docker/nginx/server.crt
+  docker compose cp web:/etc/nginx/ssl/server.key ./docker/nginx/server.key
+  ```
+- Jika ingin memakai sertifikat sendiri, salin `server.crt` dan `server.key` ke `docker/nginx/ssl` di host lalu paksa ulang build Nginx:
+  ```bash
+  mkdir -p docker/nginx/ssl
+  # salin sertifikat custom Anda ke folder di atas
+  docker compose up -d --force-recreate web
+  ```
+- Atur `SSL_CERT_CN` di `.env` untuk mengganti nama host pada sertifikat dan tambahkan entri ke `/etc/hosts` bila memakai domain lokal khusus.
 
 ## Struktur Proyek
 ### Folder app
