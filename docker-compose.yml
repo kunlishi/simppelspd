@@ -19,7 +19,9 @@ services:
         condition: service_healthy
     volumes:
       - app-data:/var/www/html
-      - ./.env:/var/www/html/.env
+      - ./.env:/var/www/html/.env.host
+    command: >
+      sh -lc "ln -sf /var/www/html/.env.host /var/www/html/.env && php-fpm"
     networks:
       - internal
 
@@ -41,7 +43,7 @@ services:
       SSL_CERT_DAYS: ${SSL_CERT_DAYS:-365}
     volumes:
     - app-data:/var/www/html
-    - ./.env:/var/www/html/.env
+    - ./.env:/var/www/html/.env.host
     networks:
       - internal
       - public
