@@ -42,8 +42,13 @@ COPY resources ./resources
 COPY routes ./routes
 COPY storage ./storage
 
-# Gunakan environment lokal agar artisan tidak mencoba menghubungi MySQL saat build
-RUN cp .env.example .env && sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+# Salin .env contoh lalu pakai SQLite sementara agar artisan tidak memerlukan MySQL
+RUN cp .env.example .env && \
+    sed -i 's/^APP_ENV=.*/APP_ENV=local/' .env && \
+    sed -i 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env && \
+    sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env && \
+    sed -i 's/^DB_DATABASE=.*/DB_DATABASE=database\/database.sqlite/' .env && \
+    mkdir -p database && touch database/database.sqlite
 
 RUN composer install --no-dev --no-progress --no-interaction --prefer-dist
 
