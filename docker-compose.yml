@@ -78,7 +78,7 @@ services:
       PMA_PASSWORD: ${DB_PASSWORD:-secret}
       UPLOAD_LIMIT: 128M
     ports:
-      - "${PHPMYADMIN_PORT:-8081}:80"
+      - "${PHPMYADMIN_PORT:-8088}:80"
     networks:
       - internal
       - public
