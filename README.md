@@ -6,6 +6,8 @@ SIMPPEL adalah sistem berbasis Laravel yang digunakan oleh SPD untuk mencatat da
 * [Buku Manual Penggunaan]()
 * [Dokumen Alih Hak Sistem](https://drive.google.com/file/d/1Uq9osOrnu0u0-f1HPT-GhERo1FsqVoxY/view?usp=sharing)
 * [Dokumen Berita Acara](https://drive.google.com/file/d/1S7ScD8-jKJmJBfhT95wvIagEBLFV8eBc/view?usp=sharing)
+* [README_DOCKER](README_DOCKER.md)
+* [Ringkasan Perubahan Docker](README_CHANGES.md)
 
 ## Penggunaan Repositori
 Unduh repository ke dalam komputer menggunakan perintah `git clone`. Url
@@ -34,6 +36,42 @@ php artisan db:seed --class=PelanggaranSeeder
 php artisan db:seed --class=PemonitorSeeder
 php artisan db:seed --class=SPDSeeder
 ```
+
+## Menjalankan dengan Docker
+Lingkungan Docker menyediakan stack lengkap berisi PHP-FPM, Nginx dengan SSL, MySQL, dan phpMyAdmin.
+
+1. Salin file environment kemudian sesuaikan kredensial bila perlu:
+   ```bash
+   cp .env.example .env
+   ```
+2. Bangun dan jalankan seluruh layanan:
+   ```bash
+   docker compose up --build -d
+   ```
+3. Hasilkan `APP_KEY`, jalankan migrasi, dan seed data dari dalam kontainer aplikasi:
+   ```bash
+   docker compose exec app php artisan key:generate
+   docker compose exec app php artisan migrate --seed
+   ```
+4. Akses aplikasi di `https://localhost:8443` (HTTP dialihkan otomatis ke HTTPS). Sertifikat yang dibuat bersifat self-signed; tambahkan pengecualian di browser atau override nama domain dengan mengubah variabel `SSL_CERT_CN` dan menambahkan entri ke `/etc/hosts` bila diperlukan.
+5. phpMyAdmin tersedia di `http://localhost:8088`, gunakan kredensial yang sama dengan database (`laravel`/`secret` secara bawaan).
+6. MySQL diekspos di port host `33060` sehingga dapat dihubungi oleh klien eksternal bila dibutuhkan.
+
+Perintah tambahan dapat dijalankan dengan `docker compose exec app <perintah>` (misalnya untuk queue worker atau kompilasi aset tambahan).
+
+### Sertifikat & HTTPS
+- Kontainer `web` membuat sertifikat self-signed otomatis di `/etc/nginx/ssl`. Untuk menyalin sertifikat ke host (misal agar bisa di-trust secara manual), jalankan:
+  ```bash
+  docker compose cp web:/etc/nginx/ssl/server.crt ./docker/nginx/server.crt
+  docker compose cp web:/etc/nginx/ssl/server.key ./docker/nginx/server.key
+  ```
+- Jika ingin memakai sertifikat sendiri, salin `server.crt` dan `server.key` ke `docker/nginx/ssl` di host lalu paksa ulang build Nginx:
+  ```bash
+  mkdir -p docker/nginx/ssl
+  # salin sertifikat custom Anda ke folder di atas
+  docker compose up -d --force-recreate web
+  ```
+- Atur `SSL_CERT_CN` di `.env` untuk mengganti nama host pada sertifikat dan tambahkan entri ke `/etc/hosts` bila memakai domain lokal khusus.
 
 ## Struktur Proyek
 ### Folder app
