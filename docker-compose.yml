@@ -19,6 +19,7 @@ services:
         condition: service_healthy
     volumes:
       - app-data:/var/www/html
+      - ./.env:/var/www/html/.env
     networks:
       - internal
 
