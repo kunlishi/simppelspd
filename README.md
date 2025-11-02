@@ -8,32 +8,78 @@ SIMPPEL adalah sistem berbasis Laravel yang digunakan oleh SPD untuk mencatat da
 * [Dokumen Berita Acara](https://drive.google.com/file/d/1S7ScD8-jKJmJBfhT95wvIagEBLFV8eBc/view?usp=sharing)
 
 ## Penggunaan Repositori
-Unduh repository ke dalam komputer menggunakan perintah `git clone`. Url
-repository dapat dilihat di dalam repository yang diinginkan.
+Clone repositori seperti biasa:
 
 ```
 git clone <url repository> <folder tujuan>
 ```
 
-Pastikan pengguna memiliki Laragon untuk mengakses website secara lokal
-Jalankan beberapa perintah berikut pada terminal Laragon yang direktorinya sudah mengarah ke folder hasil clone
-```
-composer install
-npm install
-npm run build
-php artisan key:generate
-```
-Lakukan pula seeding untuk database awal dengan menjalankan perinta berikut pada terminal
-```
-php artisan db:seed --class=AdminSeeder
-php artisan db:seed --class=AutentikasiSeeder
-php artisan db:seed --class=DummyFaqSeeder
-php artisan db:seed --class=DummyPeraturanSeeder
-php artisan db:seed --class=DummySeederMahasiswa
-php artisan db:seed --class=PelanggaranSeeder
-php artisan db:seed --class=PemonitorSeeder
-php artisan db:seed --class=SPDSeeder
-```
+Setelah itu pilih salah satu alur kerja berikut.
+
+### Opsi A &mdash; Jalankan dengan Docker
+
+1. **Persyaratan**: Docker Desktop atau Docker Engine + Compose v2, Node 20 (untuk rebuild aset optional).
+2. **Siapkan environment**
+   - Windows: `copy .env.example .env`
+   - macOS / Linux: `cp .env.example .env`
+   - Opsi Laragon tersedia pada file `.env.laragon.example` bila ingin menyalin nilai lokal.
+3. **Bangun dan jalankan kontainer**
+   ```
+   docker compose up -d --build
+   ```
+   Entrypoint kontainer otomatis:
+   - Membuat tautan `.env` dari host (atau menyalin `.env.example` jika belum ada).
+   - Mengatur izin folder `storage` dan `bootstrap/cache`.
+   - Mengenerate `APP_KEY` apabila kosong.
+4. **Instal dependensi tambahan (opsional)**
+   Composer dan npm sudah diproses saat build. Bila ingin memperbarui vendor atau assets:
+   ```
+   docker compose exec app composer install
+   docker compose exec app php artisan migrate
+   docker compose exec app php artisan db:seed
+   docker compose exec app npm install
+   docker compose exec app npm run build
+   ```
+5. **Akses aplikasi**
+   - HTTPS: https://localhost:8443
+   - HTTP: http://localhost:8080
+   - PhpMyAdmin: http://localhost:8088
+6. **Perintah utilitas umum**
+   ```
+   docker compose exec app php artisan migrate:refresh --seed
+   docker compose exec app php artisan cache:clear
+   docker compose logs -f app
+   docker compose down
+   ```
+
+> Catatan: Jika ingin restart bersih, jalankan `docker compose down -v` untuk menghapus volume dan ulangi langkah di atas.
+
+### Opsi B &mdash; Jalankan dengan Laragon (Windows)
+
+1. **Siapkan host**
+   - Buka *Terminal Laragon* lalu arahkan ke folder hasil clone.
+   - Salin konfigurasi Laragon: `copy .env.laragon.example .env`.
+   - Sesuaikan nama host pada `APP_URL` (contoh `http://simppelspd.test`) lalu tambah domain tersebut di menu *Laragon > Menu > Hosts File > Add*.
+2. **Dependensi**
+   ```
+   composer install
+   npm install
+   npm run build
+   php artisan key:generate
+   ```
+3. **Migrasi & seeding**
+   ```
+   php artisan migrate
+   php artisan db:seed --class=DatabaseSeeder
+   # atau jalankan seeder terpisah bila diperlukan
+   ```
+4. **Jalankan aplikasi**
+   - Gunakan `php artisan serve` atau buat virtual host melalui Laragon.
+   - Pastikan layanan MySQL di Laragon aktif dengan database sesuai `.env` (`simppelspd` secara default).
+
+Tips:
+- Bila menggunakan driver cache/queue database, pastikan tabel terkait sudah dimigrasikan.
+- Gunakan `php artisan config:clear` setiap kali mengubah `.env` supaya perubahan langsung terbaca.
 
 ## Struktur Proyek
 ### Folder app

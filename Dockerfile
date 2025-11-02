@@ -64,6 +64,9 @@ RUN sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env.example
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+COPY docker/app-entrypoint.sh /usr/local/bin/docker-app-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-app-entrypoint.sh
+
 EXPOSE 9000
 
-CMD ["php-fpm"]
+ENTRYPOINT ["/usr/local/bin/docker-app-entrypoint.sh"]
