@@ -40,7 +40,7 @@ services:
       SSL_CERT_DAYS: ${SSL_CERT_DAYS:-365}
     volumes:
     - app-data:/var/www/html
-    - ./.env:/var/www/html/.env
+    - ./.env:/var/www/html/.env ./.env
     networks:
       - internal
       - public
