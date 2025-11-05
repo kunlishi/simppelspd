@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin - Review Izin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 24px auto; padding: 0 12px; }
+    button { padding: 6px 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Admin Review</h1>
+  <script src="./common.js"></script>
+  <fieldset>
+    <legend>Registrasi Admin</legend>
+    <label>Nama</label>
+    <input id="name" />
+    <label>Email</label>
+    <input id="email" type="email" />
+    <label>Password</label>
+    <input id="password" type="password" />
+    <button onclick="register()">Daftar Admin</button>
+  </fieldset>
+  <fieldset>
+    <legend>Login</legend>
+    <label>Email</label>
+    <input id="lemail" type="email" />
+    <label>Password</label>
+    <input id="lpassword" type="password" />
+    <button onclick="login()">Login</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Pengajuan Pending</legend>
+    <button onclick="loadPending()">Muat</button>
+    <div id="list"></div>
+  </fieldset>
+
+  <script>
+    function show(m){ alert(m); }
+    async function register(){
+      const body = { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value };
+      const res = await api('/api/auth/register-admin', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('Admin terdaftar');
+    }
+    async function login(){
+      const body = { email: document.getElementById('lemail').value, password: document.getElementById('lpassword').value };
+      const res = await api('/api/auth/login', { method: 'POST', body: JSON.stringify(body) });
+      saveToken(res.token); show('Login sukses');
+    }
+    async function loadPending(){
+      const res = await api('/api/permit/pending');
+      const root = document.getElementById('list');
+      root.innerHTML = '';
+      const table = document.createElement('table');
+      table.innerHTML = '<tr><th>ID</th><th>Type</th><th>Reason</th><th>Status</th><th>Aksi</th></tr>';
+      res.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.id}</td><td>${p.type}</td><td>${p.reason}</td><td>${p.status}</td>`;
+        const td = document.createElement('td');
+        const a = document.createElement('button'); a.textContent='Approve'; a.onclick=()=>review(p.id,true);
+        const r = document.createElement('button'); r.textContent='Reject'; r.onclick=()=>review(p.id,false);
+        td.appendChild(a); td.appendChild(r);
+        tr.appendChild(td);
+        table.appendChild(tr);
+      });
+      root.appendChild(table);
+    }
+    async function review(id, approve){
+      const res = await api(`/api/permit/${id}/review?approve=${approve}`, { method: 'POST' });
+      show('Updated: ' + JSON.stringify(res));
+      loadPending();
+    }
+  </script>
+</body>
+</html>
