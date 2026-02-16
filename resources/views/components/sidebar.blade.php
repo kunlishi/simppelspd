@@ -46,7 +46,7 @@
                             </svg>
                         </button>
                         <ul id="dropdown-pencatatan"
-                            class="{{ request()->is('catat-rutin', 'catat-umum', 'catat-harian') ? '' : 'hidden' }} py-2 space-y-2">
+                            class="{{ request()->is('catat-rutin', 'catat-umum', 'catat-harian', 'presensi') ? '' : 'hidden' }} py-2 space-y-2">
                             <li>
                                 <x-sidebarcomp href="/catat-rutin" :active="request()->is('catat-rutin')">Operasi Rutin</x-sidebarcomp>
                             </li>
@@ -55,6 +55,9 @@
                             </li>
                             <li>
                                 <x-sidebarcomp href="/catat-harian" :active="request()->is('catat-harian')">Penindakan Harian</x-sidebarcomp>
+                            </li>
+                            <li>
+                                <x-sidebarcomp href="/presensi" :active="request()->is('daftar-apel')">Presensi Apel</x-sidebarcomp>
                             </li>
                         </ul>
                     </li>
@@ -94,6 +97,9 @@
                                         Harian</x-sidebarcomp>
                                 </li>
                             @endif
+                            <li>
+                                <x-sidebarcomp href="/presensi/report" :active="request()->is('presensi/report')">Laporan Apel</x-sidebarcomp>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -115,7 +121,13 @@
                 @endif
 
                 @if (Auth::user()->role == 'admin')
-                    <li style="color: white">
+                <li style = "color: white">
+                    <x-sidebarlink href="/daftar-apel" :active="request()->is('daftar-apel')"
+                        icon='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'>
+                        Daftar Apel
+                    </x-sidebarlink>   
+                </li>    
+                <li style="color: white">
                         <x-sidebarlink href="/buat-token" :active="request()->is('buat-token')"
                             icon='
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

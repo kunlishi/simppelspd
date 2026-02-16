@@ -263,7 +263,7 @@ class AutentikasiSeeder extends Seeder
             [
                 'username' => '24120231',
                 'role' => 'spd',
-                'password' => bcrypt('nbVqk9QM')
+                'password' => bcrypt('AAikun04>')
             ],
             [
                 'username' => '24120236',
