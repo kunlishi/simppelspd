@@ -147,7 +147,14 @@
                                 <td class="italic text-[10px] text-gray-400">{{ $row->nama_petugas ?? 'Sistem' }}</td>
                                 @if(Auth::user()->role == 'admin')
                                 <td class="flex justify-center py-4">
-                                    <button class="text-blue-600 hover:underline text-xs">Edit</button>
+                                    <button type="button" 
+                                        onclick="openEditStatus('{{ $row->id }}', '{{ $row->status }}')"
+                                        class="text-blue-600 hover:text-blue-900 font-medium text-xs flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                        Edit
+                                    </button>
                                 </td>
                                 @endif
                             </tr>
@@ -189,6 +196,73 @@
             const nim = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
             const name = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
             row.style.display = (nim.includes(query) || name.includes(query)) ? '' : 'none';
+        });
+    }
+    
+    function openEditStatus(id, currentStatus) {
+        Swal.fire({
+            title: 'Ubah Status Presensi',
+            input: 'select',
+            inputOptions: {
+                'hadir': 'HADIR',
+                'tidak_hadir': 'TIDAK HADIR',
+                'terlambat': 'TERLAMBAT',
+                'izin': 'IZIN',
+                'sakit': 'SAKIT'
+            },
+            inputValue: currentStatus,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan Perubahan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#1d4ed8', // blue-700
+            inputValidator: (value) => {
+                return new Promise((resolve) => {
+                    if (value) {
+                        resolve();
+                    } else {
+                        resolve('Anda harus memilih status!');
+                    }
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jalankan Fetch API ke Controller
+                updateStatus(id, result.value);
+            }
+        });
+    }
+
+    function updateStatus(id, newStatus) {
+        // Tampilkan loading
+        Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+        fetch(`/presensi/update-status/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Penting untuk keamanan Laravel
+            },
+            body: JSON.stringify({
+                status: newStatus,
+                nama_petugas: '{{ Auth::user()->name }}' // Mengambil nama petugas yang sedang login
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: data.message,
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                // Reload halaman agar tabel terupdate
+                window.location.reload();
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Gagal!', 'Terjadi kesalahan saat memperbarui status.', 'error');
         });
     }
 </script>

@@ -155,7 +155,7 @@ class PresensiController extends Controller
 
         $presensi = Presensi::findOrFail($id);
         $presensi->status = $request->status;
-        $presensi->nama_petugas = $request->nama_petugas;
+        $presensi->nama_petugas = "Petugas Perizinan";
         $presensi->save();
 
         return response()->json(['message' => 'Status presensi berhasil diperbarui.']);
