@@ -1,7 +1,7 @@
 <x-layout>
     <x-slot:title>Jadwal Apel Mahasiswa</x-slot:title>
 
-    <div class="p-4 sm:ml-0">
+    <div class="p-4 sm:ml-64">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Jadwal Apel Mahasiswa</h2>
@@ -40,21 +40,36 @@
             @forelse ($apels as $apel)
             <div class="flex flex-col p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+                    <span class="bg-blue-100 text-blue-800 text-base font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
                         <i class="far fa-calendar-alt me-1"></i>
-                        {{ \Carbon\Carbon::parse($apel->tanggal_apel)->format('d F Y') }}
+                        Tingkat {{ $apel->tingkat }}
                     </span>
                     <div class="text-gray-400">
                         <i class="fas fa-ellipsis-h"></i>
                     </div>
                 </div>
 
-                <h5 class="mb-5 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <h5 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {{ $apel->nama_apel }}
                 </h5>
+
+                <div class="space-y-2 mt-1 mb-2 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ \Carbon\Carbon::parse($apel->tanggal_apel)->translatedFormat('l, d F Y') }}
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Mulai: <span class="font-bold ml-1 text-red-600">{{ $apel->waktu_apel ?? '--:--' }}</span>
+                    </div>
+                </div>
                 
                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-2">
                     @if(Auth::user()->role == 'admin')
+                    <a href="{{ route('apel.report', ['tanggal' => $apel->tanggal_apel, 'tingkat' => $apel->tingkat]) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-eye me-1"></i> Lihat
+                    </a>
+
                     <a href="{{ route('apel.edit', $apel->id) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-yellow-400 rounded-lg hover:bg-yellow-500 transition-colors">
                         <i class="fas fa-edit me-1"></i> Edit
                     </a>

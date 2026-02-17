@@ -7,7 +7,7 @@
             <p class="text-center text-gray-800 dark:text-gray-400 italic opacity-50">(Silakan perbarui data di bawah ini)</p>
 
             {{-- Form --}}
-                <form class="max-w-sm mx-auto pt-6" action="{{ route('admin.apel.update', $apel->id) }}" method="POST" id="editForm">
+                <form class="max-w-sm mx-auto pt-6" action="{{ route('apel.update', $apel->id) }}" method="POST" id="editForm">
                     @csrf
                     @method('PUT')
                     {{-- Sangat Penting: Ambil nilai awal dari variabel $apel --}}
@@ -30,7 +30,7 @@
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <a href="{{ route('admin.apel.index') }}" class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">Batal</a>
+                        <a href="{{ route('apel.index') }}" class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">Batal</a>
                         <button type="submit" class="text-white bg-blue-700 hover:bg-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">
                             Update
                         </button>
@@ -55,22 +55,11 @@
                 confirmButtonText: 'Ya, Update!',
                 cancelButtonText: 'Batal',
                 didOpen: () => {
-                    const confirmBtn = document.querySelector('.swal2-confirm');
-                    const cancelBtn = document.querySelector('.swal2-cancel');
+                    const confirmBtn = Swal.getConfirmButton();
+                    const cancelBtn = Swal.getCancelButton();
                     
-                    confirmBtn.onmouseover = () => {
-                        confirmBtn.style.backgroundColor = '#0f52ba';
-                    };
-                    confirmBtn.onmouseout = () => {
-                        confirmBtn.style.backgroundColor = '#3085d6';
-                    };
-                    
-                    cancelBtn.onmouseover = () => {
-                        cancelBtn.style.backgroundColor = '#ff5555';
-                    };
-                    cancelBtn.onmouseout = () => {
-                        cancelBtn.style.backgroundColor = '#d33';
-                    };
+                    confirmBtn.style.backgroundColor = '#3085d6';
+                    cancelBtn.style.backgroundColor = '#d33';
                 }
             }).then((result) => {
                 if (result.isConfirmed) {

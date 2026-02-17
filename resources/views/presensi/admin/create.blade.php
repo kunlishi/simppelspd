@@ -70,22 +70,12 @@
                 confirmButtonText: 'Ya, Simpan!',
                 cancelButtonText: 'Batal',
                 didOpen: () => {
-                    const confirmBtn = document.querySelector('.swal2-confirm');
-                    const cancelBtn = document.querySelector('.swal2-cancel');
+                    const confirmBtn = Swal.getConfirmButton();
+                    const cancelBtn = Swal.getCancelButton();
                     
-                    confirmBtn.onmouseover = () => {
-                        confirmBtn.style.backgroundColor = '#0f52ba';
-                    };
-                    confirmBtn.onmouseout = () => {
-                        confirmBtn.style.backgroundColor = '#3085d6';
-                    };
-                    
-                    cancelBtn.onmouseover = () => {
-                        cancelBtn.style.backgroundColor = '#ff5555';
-                    };
-                    cancelBtn.onmouseout = () => {
-                        cancelBtn.style.backgroundColor = '#d33';
-                    };
+                    confirmBtn.style.backgroundColor = '#3085d6';
+                    cancelBtn.style.backgroundColor = '#d33';
+
                 }
             }).then((result) => {
                 if (result.isConfirmed) {

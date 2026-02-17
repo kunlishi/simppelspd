@@ -28,22 +28,29 @@ class PresensiController extends Controller
         }
 
         if ($presensi->status === 'hadir') {
-            return response()->json(['message' => 'Mahasiswa sudah hadir.'], 400);
+            return response()->json(['status' => 'error', 'message' => 'Mahasiswa sudah hadir.'], 400);
         }
 
-        if($tanggal_apel = Apel::find($apel_id)->tanggal_apel) {
+        $apel = Apel::findOrFail($apel_id);
+        $tanggal_apel = $apel->tanggal_apel;
+        $waktu_apel = $apel->waktu_apel;
+
+        if($tanggal_apel) {
             $current_date = now()->toDateString();
             if ($current_date !== $tanggal_apel->toDateString()) {
-                return redirect()->back()->with('message', 'Presensi hanya bisa dicatat pada tanggal apel.');
+                return response()->json(['status' => 'error', 'message' => 'Presensi hanya dapat dilakukan pada tanggal apel.'], 400);
             }
         }
 
-        if ($waktu_apel = Apel::find($apel_id)->waktu_apel) {
+        if ($waktu_apel) {
+            $mulai = $waktu_apel->copy()->subMinutes(150);
+            $akhir = $waktu_apel->copy()->addMinutes(30);
+
             $current_time = now();
-            if($current_time < $waktu_apel->subMinutes(150)){
-                return redirect()->back()->with('message', 'Presensi belum bisa dicatat. Tunggu hingga 2 jam 30 menit sebelum waktu apel.');
-            } elseif ($current_time > $waktu_apel->addMinutes(30)){
-                return redirect()->back()->with('message', 'Presensi sudah tidak bisa dicatat. Waktu apel sudah lewat 30 menit.');
+            if($current_time < $mulai){
+                return response()->json(['status' => 'error', 'message' => 'Waktu presensi belum dimulai.'], 400);
+            } elseif ($current_time > $akhir){
+                return response()->json(['status' => 'error', 'message' => 'Waktu presensi sudah berakhir.'], 400);
             } elseif ($current_time > $waktu_apel){
                 $presensi->status = 'terlambat';
             } else {
@@ -51,10 +58,19 @@ class PresensiController extends Controller
             }
         }
 
-        $presensi->nama_petugas = SPD::where('nas', Auth::user()->username)->first()->nama_anggota ?? 'Petugas Tidak Dikenal';
+        $petugas = SPD::where('nas', Auth::user()->username)->first();
+        $presensi->nama_petugas = optional($petugas)->nama_anggota ?? 'Petugas Tidak Dikenal';
         $presensi->save();
-
-        return redirect()->back()->with('message', 'Presensi berhasil dicatat.');  
+        return response()->json([
+            'status' => 'success', 
+            'message' => 'Presensi berhasil dicatat.', 
+            'data' => [
+                'waktu' => $presensi->updated_at->format('H:i:s'),
+                'nim' => $presensi->nim,
+                'nama' => $presensi->mahasiswa->nama ?? '-',
+                'status' => strtoupper($presensi->status)
+            ]
+        ]); 
     }
 
     public function reportIndex(Request $request)
@@ -83,6 +99,7 @@ class PresensiController extends Controller
 
         // Mengambil data lengkap (hadir, tidak_hadir, dll)
         $data = $query->orderBy('apel.tanggal_apel', 'desc')
+                    ->orderBy('presensi.kelas', 'asc')
                     ->orderBy('presensi.nim', 'asc')
                     ->paginate(30);
 

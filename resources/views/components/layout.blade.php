@@ -22,6 +22,7 @@
 <body>
     <x-header></x-header>
     <x-sidebar></x-sidebar>
+    {{ $slot }}
     <x-faq-button></x-faq-button>
 </body>
 

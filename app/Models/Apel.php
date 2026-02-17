@@ -19,5 +19,7 @@ class Apel extends Model
 
     protected $casts = [
         'tingkat'=>'integer',
+        'tanggal_apel'=>'date',
+        'waktu_apel'=>'datetime',
     ];
 }
