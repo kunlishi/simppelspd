@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\SPD;
 use App\Exports\PresensiExport;
 use Illuminate\Http\Request;
-use Meatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
@@ -94,7 +94,8 @@ class PresensiController extends Controller
         }
 
         if ($request->filled('nama')) {
-            $query->where('presensi.nama', 'like', '%' . $request->nama . '%');
+            $query->where('mahasiswas.nama', 'like', '%' . $request->nama . '%')
+                  ->orWhere('presensi.nim', 'like', '%' . $request->nama . '%');
         }
 
         // Mengambil data lengkap (hadir, tidak_hadir, dll)
@@ -108,12 +109,10 @@ class PresensiController extends Controller
 
     public function downloadFilteredData(Request $request, $format)
     {
-        // 1. Definisikan Query dengan Join agar filter berfungsi
         $query = Presensi::join('apel', 'presensi.apel_id', '=', 'apel.id')
             ->leftJoin('mahasiswas', 'presensi.nim', '=', 'mahasiswas.nim')
-            ->select('presensi.*', 'apel.tanggal_apel as tanggal', 'mahasiswas.kelas');
+            ->select('presensi.*', 'apel.tanggal_apel as tanggal', 'mahasiswas.kelas', 'mahasiswas.nama');
 
-        // 2. Terapkan Filter (sama seperti di reportIndex)
         if ($request->filled('tanggal')) { 
             $query->whereDate('apel.tanggal_apel', $request->tanggal); 
         }
@@ -121,27 +120,15 @@ class PresensiController extends Controller
             $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]); 
         }
 
-        // 3. Ambil data hasil filter
         $exportData = $query->get();
-        
-        // 4. Ambil variabel tanggal dari input untuk dikirim ke Export Class
-        $tanggal = $request->input('tanggal'); 
+        $tanggal_filter = $request->input('tanggal'); 
+        $fileName = "laporan_presensi_" . ($tanggal_filter ?? now()->format('Ymd'));
 
-        // Tentukan nama file
-        $fileName = "laporan_presensi_" . ($tanggal ?? now()->format('Ymd'));
-
-        // PERBAIKAN: Kirim 2 argumen ($exportData DAN $tanggal)
+        // Menggunakan Alias Excel yang benar
         if ($format === 'excel') {
-            return \Maatwebsite\Excel\Facades\Excel::download(
-                new \App\Exports\PresensiExport($exportData, $tanggal), 
-                "{$fileName}.xlsx"
-            );
+            return Excel::download(new \App\Exports\PresensiExport($exportData, $tanggal_filter), "{$fileName}.xlsx");
         } else {
-            return \Maatwebsite\Excel\Facades\Excel::download(
-                new \App\Exports\PresensiExport($exportData, $tanggal), 
-                "{$fileName}.csv", 
-                \Maatwebsite\Excel\Excel::CSV
-            );
+            return Excel::download(new \App\Exports\PresensiExport($exportData, $tanggal_filter), "{$fileName}.csv", \Maatwebsite\Excel\Excel::CSV);
         }
     }
 
