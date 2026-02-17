@@ -106,14 +106,14 @@ class PresensiController extends Controller
         return view('presensi.report', compact('data'));
     }
 
-    public function downloadFilteredData_(Request $request, $format)
+    public function downloadFilteredData(Request $request, $format)
     {
-        // 1. Definisikan Query
+        // 1. Definisikan Query dengan Join agar filter berfungsi
         $query = Presensi::join('apel', 'presensi.apel_id', '=', 'apel.id')
             ->leftJoin('mahasiswas', 'presensi.nim', '=', 'mahasiswas.nim')
             ->select('presensi.*', 'apel.tanggal_apel as tanggal', 'mahasiswas.kelas');
 
-        // 2. Terapkan Filter yang sama dengan halaman laporan
+        // 2. Terapkan Filter (sama seperti di reportIndex)
         if ($request->filled('tanggal')) { 
             $query->whereDate('apel.tanggal_apel', $request->tanggal); 
         }
@@ -121,17 +121,27 @@ class PresensiController extends Controller
             $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]); 
         }
 
-        // 3. Ambil data dan variabel tanggal
+        // 3. Ambil data hasil filter
         $exportData = $query->get();
-        $tanggal = $request->input('tanggal'); // Pastikan variabel ini ada untuk dikirim
+        
+        // 4. Ambil variabel tanggal dari input untuk dikirim ke Export Class
+        $tanggal = $request->input('tanggal'); 
 
+        // Tentukan nama file
         $fileName = "laporan_presensi_" . ($tanggal ?? now()->format('Ymd'));
 
-        // 4. Perbaikan: Kirim 2 Argumen ($exportData dan $tanggal)
+        // PERBAIKAN: Kirim 2 argumen ($exportData DAN $tanggal)
         if ($format === 'excel') {
-            return Excel::download(new PresensiExport($exportData, $tanggal), "{$fileName}.xlsx");
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\PresensiExport($exportData, $tanggal), 
+                "{$fileName}.xlsx"
+            );
         } else {
-            return Excel::download(new PresensiExport($exportData, $tanggal), "{$fileName}.csv", \Maatwebsite\Excel\Excel::CSV);
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\PresensiExport($exportData, $tanggal), 
+                "{$fileName}.csv", 
+                \Maatwebsite\Excel\Excel::CSV
+            );
         }
     }
 
