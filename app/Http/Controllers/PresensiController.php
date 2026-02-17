@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\SPD;
 use App\Exports\PresensiExport;
 use Illuminate\Http\Request;
-use Meaatwebsite\Excel\Facades\Excel;
+use Meatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
