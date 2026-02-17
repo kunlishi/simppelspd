@@ -106,7 +106,7 @@ class PresensiController extends Controller
         return view('presensi.report', compact('data'));
     }
 
-    public function downloadFilteredData(Request $request, $format)
+    public function downloadFilteredData_(Request $request, $format)
     {
         // 1. Definisikan Query
         $query = Presensi::join('apel', 'presensi.apel_id', '=', 'apel.id')
@@ -162,22 +162,6 @@ class PresensiController extends Controller
         $presensi->save();
 
         return response()->json(['message' => 'Status presensi berhasil diperbarui.']);
-    }
-
-    public function downloadFilteredData_(Request $request, $format)
-    {
-        // Gunakan query filter yang sama dengan reportIndex
-        $query = Presensi::with('apel', 'mahasiswa');
-        // ... (tambahkan filter tanggal & tingkat di sini) ...
-        $data = $query->get();
-
-        $fileName = "laporan_presensi_" . now()->format('Ymd');
-
-        if ($format === 'excel') {
-            return Excel::download(new PresensiExport($data), "{$fileName}.xlsx");
-        } else {
-            return Excel::download(new PresensiExport($data), "{$fileName}.csv", \Maatwebsite\Excel\Excel::CSV);
-        }
     }
 
     public function destroy($id) {
