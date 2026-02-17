@@ -39,6 +39,14 @@
         }
     }
 
+    .dropdown-item-text {
+        color: #374151; /* gray-700 */
+        font-size: 0.75rem; /* text-xs */
+    }
+    .dropdown-item-text:hover {
+        color: #000000; /* black */
+    }
+
     .hover-effect:hover {
         color: black;
     }
@@ -90,12 +98,20 @@
                             class="flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-white">
                             Export as <svg class="ms-1.5 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                         </button>
-                        <div id="exportDropdown" class="z-10 hidden w-40 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700">
-                            <ul class="p-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                                <li><button onclick="downloadFile('csv')" class="group inline-flex w-full items-center rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"><span class="hover-effect">Export CSV</span></button></li>
-                                <li><button onclick="downloadFile('excel')" class="group inline-flex w-full items-center rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"><span class="hover-effect">Export EXCEL</span></button></li>
-                            </ul>
-                        </div>
+                        <div id="exportDropdown" class="z-20 hidden w-40 bg-white divide-y divide-gray-100 rounded-lg shadow-lg border border-gray-100 dark:bg-gray-700">
+                        <ul class="p-2 text-left text-xs font-medium" aria-labelledby="exportDropdownButton">
+                            <li>
+                                <button onclick="downloadFile('csv')" class="flex w-full items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dropdown-item-text dark:text-gray-200">
+                                    Export CSV
+                                </button>
+                            </li>
+                            <li>
+                                <button onclick="downloadFile('excel')" class="flex w-full items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dropdown-item-text dark:text-gray-200">
+                                    Export EXCEL
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                     </div>
 
                 </div>

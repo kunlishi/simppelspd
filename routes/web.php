@@ -154,7 +154,7 @@ Route::delete('/presensi/{id}', [PresensiController::class, 'destroy'])->middlew
 Route::get('/presensi', [PresensiController::class, 'pencatatanIndex'])->middleware('spd')->name('presensi.index');
 Route::get('/presensi/scan/{apel_id}', [PresensiController::class, 'scanPage'])->middleware('spd')->name('presensi.scan');
 Route::post('/presensi/scan/{apel_id}', [PresensiController::class, 'storeScan'])->middleware('spd')->name('presensi.store');
-Route::get('/presensi/report', [PresensiController::class, 'reportIndex'])->middleware('spd')->name('presensi.report');
+Route::get('/presensi/report', [PresensiController::class, 'reportIndex'])->middleware('auth')->name('presensi.report');
 Route::get('/presensi/download/{format}', [PresensiController::class, 'downloadFilteredData'])->name('presensi.download');
 
 // Route Klaim Pelanggaran untuk SPD
