@@ -108,20 +108,30 @@ class PresensiController extends Controller
 
     public function downloadFilteredData(Request $request, $format)
     {
+        // 1. Definisikan Query
         $query = Presensi::join('apel', 'presensi.apel_id', '=', 'apel.id')
             ->leftJoin('mahasiswas', 'presensi.nim', '=', 'mahasiswas.nim')
             ->select('presensi.*', 'apel.tanggal_apel as tanggal', 'mahasiswas.kelas');
 
-        if ($request->filled('tanggal')) { $query->whereDate('apel.tanggal_apel', $request->tanggal); }
-        if ($request->filled('tingkat')) { $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]); }
+        // 2. Terapkan Filter yang sama dengan halaman laporan
+        if ($request->filled('tanggal')) { 
+            $query->whereDate('apel.tanggal_apel', $request->tanggal); 
+        }
+        if ($request->filled('tingkat')) { 
+            $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]); 
+        }
 
+        // 3. Ambil data dan variabel tanggal
         $exportData = $query->get();
-        $tanggal = $request->input('tanggal');
+        $tanggal = $request->input('tanggal'); // Pastikan variabel ini ada untuk dikirim
 
+        $fileName = "laporan_presensi_" . ($tanggal ?? now()->format('Ymd'));
+
+        // 4. Perbaikan: Kirim 2 Argumen ($exportData dan $tanggal)
         if ($format === 'excel') {
-            return Excel::download(new PresensiExport($exportData, $tanggal), "laporan_presensi_{$tanggal}.xlsx");
+            return Excel::download(new PresensiExport($exportData, $tanggal), "{$fileName}.xlsx");
         } else {
-            return Excel::download(new PresensiExport($exportData, $tanggal), "laporan_presensi_{$tanggal}.csv", \Maatwebsite\Excel\Excel::CSV);
+            return Excel::download(new PresensiExport($exportData, $tanggal), "{$fileName}.csv", \Maatwebsite\Excel\Excel::CSV);
         }
     }
 
