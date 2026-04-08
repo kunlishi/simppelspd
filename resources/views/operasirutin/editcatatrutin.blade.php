@@ -119,7 +119,13 @@
                             confirmButtonColor: '#3085d6',
                             cancelButtonColor: '#d33',
                             confirmButtonText: 'Ya, simpan perubahan',
-                            cancelButtonText: 'Batal'
+                            cancelButtonText: 'Batal',
+                            cancelButtonText: 'Batal',
+                            customClass: {
+                                confirmButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded ml-2',
+                                cancelButton: 'bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded'
+                            },
+                            buttonsStyling: false
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 const form = document.querySelector('form');

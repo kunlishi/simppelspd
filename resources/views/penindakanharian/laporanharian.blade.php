@@ -64,7 +64,7 @@
 
         table tbody td,
         table thead th {
-            white-space: nowrap;
+            white-space: wrap;
             /* Isi tetap dalam satu baris */
         }
     }
@@ -216,10 +216,32 @@
                             <div class="relative w-full sm:w-auto">
                                 <input id="datepicker-actions" name="tanggal" type="date"
                                     value="{{ request('tanggal') }}"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Pilih Tanggal" max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
+                                    class="inline-flex items-center w-auto text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 " style="width:125px;"
+                                    max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
                                     onchange="document.getElementById('filterForm').submit();">
+                                <span id="datepicker-placeholder" 
+                                    class="absolute left-4 top-1/2 transform -translate-y-1/2 `text-gray-400 text-sm pointer-events-none p-2.5">
+                                    Pilih Tanggal
+                                </span>
                             </div>
+                            
+                            <script>
+                                const datepicker = document.getElementById('datepicker-actions');
+                                const placeholder = document.getElementById('datepicker-placeholder');
+                            
+                                // Tampilkan atau sembunyikan placeholder berdasarkan nilai input
+                                const togglePlaceholder = () => {
+                                    placeholder.style.display = datepicker.value ? 'none' : 'block';
+                                };
+                            
+                                // Event listener untuk memantau perubahan nilai
+                                datepicker.addEventListener('input', togglePlaceholder);
+                                datepicker.addEventListener('focus', togglePlaceholder);
+                                datepicker.addEventListener('blur', togglePlaceholder);
+                            
+                                // Inisialisasi awal
+                                togglePlaceholder();
+                            </script>
                         </div>
                         <label for="table-search" class="sr-only">Search</label>
                         <div class="relative w-full sm:w-auto">
@@ -234,8 +256,32 @@
                             </div>
                             <input type="text" id="table-search" name="nama"
                                 class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-50 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                value="{{ request('nama') }}" placeholder="Cari Nama" oninput="handleSearch(event)">
+                               	value="{{ request('nama') }}" placeholder="Cari Nama" autofocus>
                             </form>
+                        	<script>
+    let debounceTimer;
+    const searchInput = document.getElementById('table-search');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500); // delay 500ms setelah user berhenti mengetik
+        });
+    }
+</script>
+<script>
+    window.onload = function () {
+        const searchInput = document.getElementById('table-search');
+        if (searchInput) {
+            searchInput.focus();
+            const val = searchInput.value;
+            searchInput.value = "";   // reset dulu
+            searchInput.value = val;  // isi ulang → cursor pindah ke akhir
+        }
+    };
+</script>
                         </div>
                         <div class="relative w-full sm:w-auto">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -354,30 +400,45 @@
                                     {{-- <td class="px-6 py-4 text-center">{{ $row->tingkat }}</td> --}}
                                     <td class="px-4 py-3">{{ $row->pelanggaran }}</td>
                                     <td class="px-4 py-3">{{ $row->nama_pencatat }}</td>
-                                    <td class="py-5 flex">
-                                        <!-- Edit Button with only icon -->
-                                        <a href="{{ route('enter-token', $row->id) }}"
-                                            class="flex items-center justify-center text-white bg-yellow-300 hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-300 font-semibold rounded-lg text-sm px-4 py-2 transition-transform duration-200 transform hover:scale-105 active:scale-95 mr-2">
-                                            <!--<i class="fas fa-file-invoice mr-2"></i> <!-- Ikon edit -->
-                                            Klaim Pelanggaran
-                                        </a>
-                                        {{-- <a href="{{ route('catatedit.harian', $row->id) }}"
-                                            class="flex items-center justify-center text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm p-2 transition-all ease-in-out duration-200 transform hover:scale-105 active:scale-95 mr-2">
-                                            <i class="fas fa-edit"></i> <!-- Ikon edit -->
-                                        </a>
+                                    <td class="py-5 flex items-center justify-center">
+    <!-- Hapus Button -->
+    <form action="{{ route('delete.harian', $row->id) }}" method="POST"
+        class="inline" id="deleteForm-{{ $row->id }}">
+        @csrf
+        @method('DELETE')
+        <button type="button" onclick="confirmDelete('{{ $row->id }}')"
+            class="flex items-center justify-center text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm p-2 transition-all ease-in-out duration-200 transform hover:scale-105 active:scale-95">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
+</td>
 
-                                        <!-- Hapus Button with only icon -->
-                                        <form action="{{ route('delete.harian', $row->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Apakah Anda Yakin Ingin Menghapus Ini?')"
-                                                class="flex items-center justify-center text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm p-2 transition-all ease-in-out duration-200 transform hover:scale-105 active:scale-95">
-                                                <i class="fas fa-trash-alt"></i> <!-- Ikon trash (hapus) -->
-                                            </button>
-                                        </form> --}}
-                                    </td>
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Apakah Anda Yakin?',
+            text: 'Data yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded ml-2',
+                cancelButton: 'bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById(`deleteForm-${id}`);
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+</script>
+
+                                    
                                 </tr>
                             @empty
                                 <tr>
@@ -390,10 +451,16 @@
             </div>
         </div>
     </div>
+    <!-- Navigasi Pagination -->
     <div class="mt-4">
         {{ $data->appends(request()->query())->links('pagination::tailwind') }}
     </div>
 </div>
 <x-footer></x-footer>
-<script src="{{ asset('js/export.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+{{-- <script src="{{ asset('js/export.js') }}"></script> --}}
+{{-- <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script> --}}
+
+{{-- <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
