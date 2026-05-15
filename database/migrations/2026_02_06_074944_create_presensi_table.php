@@ -13,13 +13,25 @@ return new class extends Migration
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
+            
+            // Relasi ke tabel apel
             $table->foreignId("apel_id")->constrained("apel")->onDelete("cascade");
-            $table->string("nim")->constrained("mahasiswas")->onDelete("cascade");
-            $table->string("nama")->constrained("mahasiswas", "nim")->onDelete("cascade");
-            $table->string("kelas")->constrained("mahasiswas", "nim")->onDelete("cascade");
-            $table->enum("status", ["hadir", "terlambat", "izin", "kurang_cukup_bukti_izin", "sakit", "kurang_cukup_bukti_sakit", "tidak_hadir"])->default("tidak_hadir");
-            $table->string("nama_petugas")->nullable()->constrained("users")->onDelete("set null");
+            
+            // Relasi ke tabel mahasiswas (Menggunakan sintaks foreign key untuk tipe string)
+            $table->string("nim");
+            $table->foreign("nim")->references("nim")->on("mahasiswas")->onDelete("cascade");
+            
+            // Kolom status didefinisikan satu kali tanpa nilai default 'tidak_hadir'
+            // karena baris data ini hanya tercipta saat mahasiswa benar-benar hadir/terlambat/izin/sakit
+            $table->enum("status", ["hadir", "terlambat", "izin", "kurang_cukup_bukti_izin", "sakit", "kurang_cukup_bukti_sakit"]);
+            
+            // Relasi ke tabel spd untuk mencatat siapa petugas yang men-scan
+            $table->string('petugas_nas')->nullable();
+            $table->foreign('petugas_nas')->references('nas')->on('spd')->onDelete('set null');
+            
             $table->timestamps();
+            
+            // Mencegah mahasiswa yang sama melakukan scan 2 kali di jadwal apel yang sama
             $table->unique(['apel_id', 'nim']);
         });
     }

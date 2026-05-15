@@ -6955,7 +6955,7 @@ class DummySeederMahasiswa extends Seeder
                 'tahun_akademik' => '2025/2026',
             ],
             [
-                'nim' => '222413737',
+                'nim' => '222413742',
                 "nama" => "RAHMAT BUDIYANTO",
                 'kelas' => '2KS1',
                 'tahun_akademik' => '2025/2026',
@@ -9738,12 +9738,24 @@ class DummySeederMahasiswa extends Seeder
                 'kelas' => '1ST5',
                 'tahun_akademik' => '2025/2026',
             ],
-
-
-
         ];
-        foreach ($mahasiswaData as $key => $val) {
-            Mahasiswa::create($val);
+        foreach ($mahasiswaData as $data) {
+            // 1. Cari kelas di database berdasarkan namanya (misal: '4SE1'). 
+            // Jika belum ada, fungsi firstOrCreate akan otomatis membuatnya di tabel kelas!
+            $kelas = \App\Models\Kelas::firstOrCreate([
+                'nama_kelas' => $data['kelas']
+            ]);
+
+            // 2. Masukkan ke tabel mahasiswa menggunakan ID dari kelas yang ditemukan
+            \App\Models\Mahasiswa::create([
+                'nim'            => $data['nim'],
+                'nama'           => $data['nama'],
+                'kelas_id'       => $kelas->id, // Ini kunci perubahannya!
+                'tahun_akademik' => $data['tahun_akademik'],
+            ]);
         }
+        // foreach ($mahasiswaData as $key => $val) {
+        //     Mahasiswa::create($val);
+        // }
     }
 }

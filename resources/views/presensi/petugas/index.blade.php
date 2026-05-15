@@ -9,8 +9,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse ($apels as $apel)
-                <a href="{{ route('presensi.scan', $apel->id) }}" class="group block p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:bg-yellow-50 transition-all border-l-8 border-l-yellow-400">
-                    <div class="flex justify-between items-start mb-4">
+                <a href="{{ route('presensi.scan', $apel->id) }}" class="group block p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:bg-yellow-50 transition-all border-l-8 border-l-yellow-400">    
+                <div class="flex justify-between items-start mb-4">
                         <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded uppercase">
                             Tingkat {{ $apel->tingkat }}
                         </span>
@@ -40,8 +40,17 @@
                     </div>
                 </a>
             @empty
-                <div class="col-span-full p-12 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <p class="text-gray-500 italic">Belum ada jadwal apel yang dibuat oleh Admin.</p>
+            {{-- TAMPILAN JIKA TIDAK ADA JADWAL AKTIF --}}
+                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-4 bg-blue-100 rounded-full mb-4 dark:bg-blue-900">
+                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Belum Ada Sesi Presensi Aktif</h3>
+                    <p class="text-sm text-gray-500 text-center max-w-md dark:text-gray-400">
+                        Jadwal pemindaian QR Code baru akan muncul <b>2 jam sebelum</b> apel dimulai, dan akan otomatis ditutup <b>30 menit setelah</b> jam apel.
+                    </p>
                 </div>
             @endforelse
         </div>

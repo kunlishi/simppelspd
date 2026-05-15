@@ -14,19 +14,23 @@ class Presensi extends Model
     protected $fillable = [
         'apel_id',
         'nim',
-        'nama',
-        'kelas',
         'status',
-        'nama_petugas',
+        'petugas_nas',
+        'waktu_scan',
     ];
 
     public function apel()
     {
-        return $this->belongsTo(Apel::class, 'apel_id', 'id');
+        return $this->belongsTo(Apel::class, 'apel_id');
     }
 
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'nim', 'nim');
+    }
+
+    public function petugasSpd()
+    {
+        return $this->belongsTo(SPD::class, 'petugas_nas', 'nas');
     }
 }

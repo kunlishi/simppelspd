@@ -17,7 +17,7 @@ class Mahasiswa extends Model
     protected $fillable = [
         'nim',
         'nama',
-        'kelas',
+        'kelas_id',
         'tahun_akademik'
     ];
 
@@ -26,4 +26,8 @@ class Mahasiswa extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function kelas() {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
 }

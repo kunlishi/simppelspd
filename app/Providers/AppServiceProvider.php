@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Carbon\Carbon;
 use App\Models\KritikSaran;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -41,5 +42,10 @@ class AppServiceProvider extends ServiceProvider
 
         Carbon::setLocale('id'); // Mengatur lokal Carbon ke bahasa Indonesia
         setlocale(LC_TIME, 'id_ID');
+
+        if ($this->app->environment('local')) {
+            // Ganti dengan alamat emailmu sendiri
+            Mail::alwaysTo('email.testing.aikunlishi25@gmail.com'); 
+        }
     }
 }

@@ -24,11 +24,12 @@ class OperasiRutinController extends Controller
      */
     public function index()
     {
-        // Mengambil data dari tabel operasi_rutin dengan join ke tabel mahasiswa dan pelanggarans
+        // Mengambil data dari tabel operasi_rutin dengan join ke tabel mahasiswa, kelas, dan pelanggarans
         $data = OperasiRutin::join('mahasiswas', function ($join) {
             $join->on('operasi_rutin.nim', '=', 'mahasiswas.nim')
                 ->on('operasi_rutin.tahun_akademik', '=', 'mahasiswas.tahun_akademik');
         })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas
             ->join('pelanggarans', 'operasi_rutin.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke tabel pelanggarans
             ->where('operasi_rutin.status_pelanggaran', '!=', 'Dibatalkan') // Filter status "Dibatalkan"
             ->select(
@@ -37,7 +38,7 @@ class OperasiRutinController extends Controller
                 'operasi_rutin.updated_at',
                 'operasi_rutin.nim',
                 'mahasiswas.nama',
-                'mahasiswas.kelas',
+                'kelas.nama_kelas as kelas', // Mengambil nama_kelas dari tabel kelas
                 'pelanggarans.namaPelanggaran as pelanggaran', // Mengambil namaPelanggaran dari tabel pelanggarans
                 'operasi_rutin.nama_pencatat',
                 'operasi_rutin.status_pelanggaran',
@@ -125,17 +126,18 @@ class OperasiRutinController extends Controller
 
     public function edit($id)
     {
-        // Ambil data operasi_rutin beserta informasi mahasiswa
+        // Ambil data operasi_rutin beserta informasi mahasiswa dan kelas
         $operasiRutin = OperasiRutin::select(
             'operasi_rutin.*',
             'mahasiswas.nama',
-            'mahasiswas.kelas',
+            'kelas.nama_kelas as kelas', // Mengambil nama_kelas dari tabel kelas
             'pelanggarans.namaPelanggaran as pelanggaran' // Ambil nama pelanggaran dari tabel pelanggarans
         )
             ->join('mahasiswas', function ($join) {
                 $join->on('operasi_rutin.nim', '=', 'mahasiswas.nim')
                     ->on('operasi_rutin.tahun_akademik', '=', 'mahasiswas.tahun_akademik'); // Join berdasarkan NIM dan tahun akademik
             })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas
             ->leftJoin('pelanggarans', 'operasi_rutin.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke pelanggarans untuk mendapatkan nama pelanggaran
             ->where('operasi_rutin.id', $id) // Filter berdasarkan ID operasi_rutin
             ->firstOrFail();
@@ -243,16 +245,17 @@ class OperasiRutinController extends Controller
         $tanggal = $request->input('tanggal', null); // Nilai default null jika tidak ada filter tanggal
         $tingkat = $request->input('tingkat', null); // Nilai default null jika tidak ada filter tingkat
 
-        // Query untuk mendapatkan data dengan join ke tabel Mahasiswa
+        // Query untuk mendapatkan data dengan join ke tabel Mahasiswa dan Kelas
         $query = OperasiRutin::join('mahasiswas', function ($join) {
             $join->on('operasi_rutin.nim', '=', 'mahasiswas.nim')
                 ->on('operasi_rutin.tahun_akademik', '=', 'mahasiswas.tahun_akademik'); // Join berdasarkan NIM dan tahun akademik
         })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas
             ->join('pelanggarans', 'operasi_rutin.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke tabel pelanggarans
             ->where('operasi_rutin.status_pelanggaran', '!=', 'dibatalkan') // Abaikan data dengan status "dibatalkan"
             ->select(
                 'operasi_rutin.*',
-                'mahasiswas.kelas',
+                'kelas.nama_kelas as kelas', // Ambil nama_kelas
                 'mahasiswas.nama',
                 'pelanggarans.namaPelanggaran as pelanggaran' // Ambil nama pelanggaran
             );
@@ -262,9 +265,9 @@ class OperasiRutinController extends Controller
             $query->whereDate('operasi_rutin.created_at', $tanggal);
         }
 
-        // Terapkan filter tingkat jika ada
+        // Terapkan filter tingkat jika ada menggunakan LEFT pada nama_kelas
         if (!empty($tingkat)) {
-            $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$tingkat]);
+            $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$tingkat]);
         }
 
         // Eksekusi query
@@ -291,11 +294,12 @@ class OperasiRutinController extends Controller
 
     public function filter(Request $request)
     {
-        // Ambil query builder untuk OperasiRutin dengan join ke tabel Mahasiswa dan Pelanggarans
+        // Ambil query builder untuk OperasiRutin dengan join ke tabel Mahasiswa, Kelas, dan Pelanggarans
         $query = OperasiRutin::join('mahasiswas', function ($join) {
             $join->on('operasi_rutin.nim', '=', 'mahasiswas.nim')
                 ->on('operasi_rutin.tahun_akademik', '=', 'mahasiswas.tahun_akademik');
         })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas
             ->join('pelanggarans', 'operasi_rutin.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke tabel pelanggarans
             ->where('operasi_rutin.status_pelanggaran', '!=', 'Dibatalkan'); // Filter status "Dibatalkan"
 
@@ -304,9 +308,9 @@ class OperasiRutinController extends Controller
             $query->whereDate('operasi_rutin.created_at', $request->tanggal);
         }
 
-        // Filter berdasarkan tingkat (mengambil inisial kelas)
+        // Filter berdasarkan tingkat (mengambil inisial dari nama_kelas)
         if ($request->filled('tingkat')) {
-            $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]);
+            $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$request->tingkat]);
         }
 
         // Filter berdasarkan nama mahasiswa
@@ -321,7 +325,7 @@ class OperasiRutinController extends Controller
             'operasi_rutin.updated_at',
             'operasi_rutin.nim',
             'mahasiswas.nama',
-            'mahasiswas.kelas',
+            'kelas.nama_kelas as kelas', // Mengambil nama_kelas dari tabel kelas
             'pelanggarans.namaPelanggaran as pelanggaran', // Mengambil namaPelanggaran dari tabel pelanggarans
             'operasi_rutin.nama_pencatat',
             'operasi_rutin.status_pelanggaran',

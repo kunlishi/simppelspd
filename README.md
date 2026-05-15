@@ -32,6 +32,12 @@ php artisan db:seed --class=PemonitorSeeder
 php artisan db:seed --class=SPDSeeder
 ```
 
+Pada terminal baru jalankan
+```
+php artisan queue:work
+
+```
+
 ## Struktur Proyek
 ### Folder app
 Struktur folder app digunakan untuk mengelola logika aplikasi. Folder ini terdiri dari banyak-banyak folder di dalamnya dengan fungsi masing-masing. Berikut merupakan penjelasan singkat folder di dalamnya.

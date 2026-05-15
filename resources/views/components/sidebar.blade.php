@@ -82,7 +82,7 @@
                             </svg>
                         </button>
                         <ul id="dropdown-pelaporan"
-                            class="{{ request()->fullUrlIs('*/laporan-rutin*') || request()->fullUrlIs('*/laporan-umum*') || request()->fullUrlIs('*/laporan-harian*') ? '' : 'hidden' }}  py-2 space-y-2">
+                            class="{{ request()->fullUrlIs('*/laporan-rutin*') || request()->fullUrlIs('*/laporan-umum*') || request()->fullUrlIs('*/laporan-harian*') || request()->is('presensi/spd-report') ? '' : 'hidden' }}  py-2 space-y-2">
                             <li>
                                 <x-sidebarcomp href="{{ route('laporanrutin') }}" :active="request()->fullUrlIs('*/laporan-rutin*')">Operasi
                                     Rutin</x-sidebarcomp>
@@ -98,7 +98,7 @@
                                 </li>
                             @endif
                             <li>
-                                <x-sidebarcomp href="/presensi/report" :active="request()->is('presensi/report')">Laporan Apel</x-sidebarcomp>
+                                <x-sidebarcomp href="/presensi/spd-report" :active="request()->is('presensi/spd-report')">Laporan Apel</x-sidebarcomp>
                             </li>
                         </ul>
                     </li>

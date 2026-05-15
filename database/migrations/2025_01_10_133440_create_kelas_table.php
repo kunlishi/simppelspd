@@ -9,11 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('spd', function (Blueprint $table) {
-            $table->string('nas')-> unique();
-            $table->string('nama_anggota');
+        Schema::create('kelas', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_kelas')->unique(); // Contoh: 1KS1, 2KS2
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('spd');
+        Schema::dropIfExists('kelas');
     }
 };

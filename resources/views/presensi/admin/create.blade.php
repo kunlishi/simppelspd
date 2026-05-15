@@ -1,53 +1,136 @@
 <x-layout></x-layout>
 
+{{-- Tambahkan CSS Select2 --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <div class="p-4 sm:ml-64 mt-9">
     <div class="flex justify-center">
-        <div class="block max-w-sm p-6 bg-yellow-300 border rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 w-full">
-            <h3 class="text-2xl text-center font-bold dark:text-white">Pencatatan Jadwal Apel Baru</h3>
-            <p class="text-center text-gray-800 dark:text-gray-400 italic opacity-50">(Mohon isi data jadwal apel di bawah ini)</p>
+        <div class="block max-w-2xl p-6 bg-yellow-300 border rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 w-full">
+            <h3 class="text-2xl text-center font-bold dark:text-white mb-2">Pencatatan Jadwal Apel Baru</h3>
+            
+            {{-- BOX INFORMASI ATURAN WAKTU --}}
+            <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-600 rounded shadow-sm">
+                <h4 class="text-sm font-bold text-blue-900 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>
+                    Informasi Otomatisasi Waktu:
+                </h4>
+                <ul class="text-xs text-blue-800 space-y-1">
+                    <li>• <strong>120 Menit Sebelum:</strong> Scanner mulai dibuka (Status: Hadir).</li>
+                    <li>• <strong>Lewat Batas Waktu:</strong> Status otomatis Terlambat (Petugas SPD bisa mengubahnya manual saat scan).</li>
+                    <li>• <strong>30 Menit Setelah:</strong> Scanner otomatis ditutup (Error: Waktu Berakhir).</li>
+                    <li>• <strong>Tanpa Scan:</strong> Mahasiswa otomatis dianggap <strong>Tidak Hadir</strong> di laporan.</li>
+                </ul>
+            </div>
 
-            {{-- Form --}}
-            <form class="max-w-sm mx-auto pt-6" action="/apel-baru" method="POST" id="apelForm">
+            @if ($errors->any())
+                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-700 dark:text-red-400" role="alert">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('apel.store') }}" method="POST" id="apelForm">
                 @csrf
-                <div class="mb-5">
-                    <label for="nama_apel" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama / Jenis Apel</label>
-                    <input type="text" id="nama_apel" name="nama_apel" placeholder="Masukkan Nama Apel" required
-                        class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama / Jenis Apel</label>
+                        <input type="text" name="nama_apel" required placeholder="Contoh: Apel Pagi Senin" value="{{ old('nama_apel') }}"
+                            class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Pelaksanaan</label>
+                        <input type="date" name="tanggal_apel" required value="{{ old('tanggal_apel') }}"
+                            class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Batas Waktu Tepat Waktu</label>
+                        <input type="time" name="waktu_apel" required value="{{ old('waktu_apel') }}"
+                            class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
                 </div>
 
-                <div class="mb-5">
-                    <label for="tingkat" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tingkat</label>
-                    <input type="number" id="tingkat" name="tingkat" placeholder="Masukkan Tingkat Apel (0-4)" min="0" max="4" required
-                        class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
-                </div>
+                <hr class="h-px my-6 bg-gray-200 border-0 dark:bg-gray-700">
+                <h4 class="text-md font-bold dark:text-white mb-3">Penugasan & Peserta</h4>
 
                 <div class="mb-5">
-                    <label for="tanggal_apel" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Pelaksanaan</label>
-                    <input type="date" id="tanggal_apel" name="tanggal_apel" required
-                        class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
+                    <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Kelas Peserta Apel <span class="text-red-500">*</span></label>
+                    
+                    {{-- TOMBOL PILIH CEPAT TINGKAT --}}
+                    <div class="mb-2 flex flex-wrap gap-2">
+                        <span class="text-xs text-gray-600 dark:text-gray-400 w-full italic">Pilih Cepat Tingkat:</span>
+                        <button type="button" onclick="selectTingkat('1')" class="px-3 py-1 text-xs font-bold bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 rounded">Tk 1</button>
+                        <button type="button" onclick="selectTingkat('2')" class="px-3 py-1 text-xs font-bold bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 rounded">Tk 2</button>
+                        <button type="button" onclick="selectTingkat('3')" class="px-3 py-1 text-xs font-bold bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 rounded">Tk 3</button>
+                        <button type="button" onclick="selectTingkat('4')" class="px-3 py-1 text-xs font-bold bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 rounded">Tk 4</button>
+                        <button type="button" onclick="clearKelas()" class="px-3 py-1 text-xs font-bold bg-red-100 text-red-600 hover:bg-red-200 border border-red-200 rounded">Reset</button>
+                    </div>
+
+                    {{-- CLASS DISAMAKAN DENGAN FORM PELANGGARAN --}}
+                    <select class="select2-multiple shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        name="kelas_ids[]" id="kelas_ids" multiple="multiple" required style="background-color: white; color: black;">
+                        @foreach($kelas as $k)
+                            <option value="{{ $k->id }}" {{ (collect(old('kelas_ids'))->contains($k->id)) ? 'selected' : '' }}>
+                                {{ $k->nama_kelas }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="mb-5">
-                    <label for="waktu_apel" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Waktu Pelaksanaan</label>
-                    <input type="time" id="waktu_apel" name="waktu_apel" required
-                        class="shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Petugas SPD Jaga (Opsional)</label>
+                    
+                    {{-- CLASS DISAMAKAN DENGAN FORM PELANGGARAN --}}
+                    <select class="select2-multiple shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        name="spd_nas[]" id="spd_nas" multiple="multiple" style="background-color: white; color: black;">
+                        @foreach($petugasSpd as $spd)
+                            <option value="{{ $spd->nas }}" {{ (collect(old('spd_nas'))->contains($spd->nas)) ? 'selected' : '' }}>
+                                {{ $spd->nas }} - {{ $spd->nama_anggota }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <a href="/daftar-apel" class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">Batal</a>
-                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-900 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">
-                        Kirim
-                    </button>
+                    <a href="{{ route('apel.index') }}" class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700">Batal</a>
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-900 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">Simpan Jadwal</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- Script SweetAlert --}}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function selectTingkat(tingkat) {
+        let values = $('#kelas_ids').val() || [];
+        $('#kelas_ids option').each(function() {
+            if ($(this).text().trim().startsWith(tingkat)) {
+                if (!values.includes($(this).val())) values.push($(this).val());
+            }
+        });
+        $('#kelas_ids').val(values).trigger('change');
+    }
+
+    function clearKelas() {
+        $('#kelas_ids').val(null).trigger('change');
+    }
+
+    $(document).ready(function() {
+        // MENGGUNAKAN THEME CLASSIC AGAR SERAGAM DENGAN FORM PELANGGARAN
+        $('.select2-multiple').select2({
+            theme: "classic",
+            placeholder: "Klik untuk memilih...",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // SweetAlert Session Success
         @if (session('success'))
             Swal.fire({
                 title: 'Berhasil!',
@@ -58,25 +141,29 @@
             });
         @endif
 
+        // Konfirmasi Submit
         document.getElementById('apelForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            if($('#kelas_ids').val().length === 0) {
+                Swal.fire('Peringatan', 'Anda harus memilih minimal satu kelas peserta apel!', 'warning');
+                return;
+            }
+
             Swal.fire({
                 title: 'Apakah Anda Yakin?',
-                text: "Pastikan nama dan tanggal apel sudah benar!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Simpan!',
+                confirmButtonText: 'Ya, Kirim!',
                 cancelButtonText: 'Batal',
-                didOpen: () => {
-                    const confirmBtn = Swal.getConfirmButton();
-                    const cancelBtn = Swal.getCancelButton();
-                    
-                    confirmBtn.style.backgroundColor = '#3085d6';
-                    cancelBtn.style.backgroundColor = '#d33';
-
-                }
+                cancelButtonText: 'Batal',
+                customClass: {
+                    confirmButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded ml-2',
+                    cancelButton: 'bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
