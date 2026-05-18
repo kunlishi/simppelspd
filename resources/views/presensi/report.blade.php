@@ -86,7 +86,7 @@
                                 @endforeach
                             </select>
 
-                            {{-- Dropdown Pilih Tingkat --}}
+                            {{-- Dropdown Pilih Tingkat --}} {{--
                             <select id="tingkat-filter" name="tingkat"
                                 class="text-gray-500 bg-white border border-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm p-2 dark:bg-gray-800 dark:text-white"
                                 onchange="this.form.submit()">
@@ -95,6 +95,7 @@
                                     <option value="{{ $t }}" {{ request('tingkat') == $t ? 'selected' : '' }}>Tingkat {{ $t }}</option>
                                 @endforeach
                             </select>
+                            --}}
 
                             {{-- Pencarian Server-Side --}}
                             <div class="relative flex items-center gap-2">
@@ -122,7 +123,7 @@
                     <div class="flex flex-row items-center justify-end gap-2 w-full sm:w-auto">
         
                         {{-- Tombol Email Peringatan Alpa (Ikon Saja) --}}
-                        @if(Auth::user()->role == 'admin' && $apel_id)
+                        @if(Auth::user()->role == 'admin' && ($apel_id ?? null))
                             <button type="button" onclick="kirimEmailAlpa('{{ $apel_id }}')" 
                                 title="Kirim Email Peringatan Massal"
                                 class="flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-300 h-9 w-9">
