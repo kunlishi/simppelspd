@@ -69,6 +69,12 @@
                     <div class="flex items-center">
                         <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Mulai: <span class="font-bold ml-1 {{ \Carbon\Carbon::parse($apel->tanggal_apel)->isToday() ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
+                            {{ $apel->waktu_apel ? \Carbon\Carbon::parse($apel->waktu_apel)->subHours(2)->format('H:i') : '--:--' }}
+                        </span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Batas Kehadiran: <span class="font-bold ml-1 {{ \Carbon\Carbon::parse($apel->tanggal_apel)->isToday() ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
                             {{ $apel->waktu_apel ? \Carbon\Carbon::parse($apel->waktu_apel)->format('H:i') : '--:--' }}
                         </span>
                     </div>
@@ -151,7 +157,12 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal',
+                customClass: {
+                    confirmButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded ml-2',
+                    cancelButton: 'bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
@@ -169,7 +180,7 @@
     <script>
         Swal.fire({
             icon: 'success',
-            title: 'Terhapus!',
+            title: 'Berhasil!',
             text: "{{ session('success') }}",
             timer: 2000,
             showConfirmButton: false

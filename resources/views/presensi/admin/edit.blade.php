@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Petugas SPD Jaga (Opsional)</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Satgas SPD yang Bertugas (Opsional)</label>
                     <select class="select2-multiple shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         name="spd_nas[]" id="spd_nas" multiple="multiple" style="background-color: white; color: black;">
                         @foreach($petugasSpd as $spd)
@@ -127,11 +127,11 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Kirim!',
+                confirmButtonText: 'Ya, Ubah!',
                 cancelButtonText: 'Batal',
                 customClass: {
-                    confirmButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded ml-2',
-                    cancelButton: 'bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded'
+                    confirmButton: 'bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded ml-2',
+                    cancelButton: 'bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded'
                 },
                 buttonsStyling: false
             }).then((result) => {

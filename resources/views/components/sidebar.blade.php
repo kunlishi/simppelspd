@@ -57,7 +57,7 @@
                                 <x-sidebarcomp href="/catat-harian" :active="request()->is('catat-harian')">Penindakan Harian</x-sidebarcomp>
                             </li>
                             <li>
-                                <x-sidebarcomp href="/presensi" :active="request()->is('daftar-apel')">Presensi Apel</x-sidebarcomp>
+                                <x-sidebarcomp href="/presensi" :active="request()->is('presensi')">Presensi Apel</x-sidebarcomp>
                             </li>
                         </ul>
                     </li>
