@@ -1,4 +1,5 @@
 <x-layout>
+    @php $apel_id = $apel_id ?? null; @endphp
 <style>
     /* Garis pembatas untuk tabel */
     table {

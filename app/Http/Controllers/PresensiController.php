@@ -112,7 +112,7 @@ class PresensiController extends Controller
     public function reportIndex(Request $request)
     {
         // Pastikan ada apel_id yang dipilih, atau ambil apel terakhir
-        $apel_id = $request->input('apel_id');
+        $apel_id = $request->input('apel_id', null);
         if (!$apel_id) {
             $apelTerakhir = Apel::orderBy('tanggal_apel', 'desc')->first();
             $apel_id = $apelTerakhir ? $apelTerakhir->id : null;
