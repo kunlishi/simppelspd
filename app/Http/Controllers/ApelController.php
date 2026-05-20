@@ -24,14 +24,10 @@ class ApelController extends Controller
         $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
         
         // Mengambil semua data petugas SPD untuk pilihan petugas jaga
-        $petugasSpd = SPD::orderBy('nas', 'asc')->get(); // Sesuaikan 'nas' dengan kolom nama jika ada
+        //$petugasSpd = SPD::orderBy('nas', 'asc')->get(); // Sesuaikan 'nas' dengan kolom nama jika ada
 
-        return view('presensi.admin.create', compact('kelas', 'petugasSpd'));
+        return view('presensi.admin.create', compact('kelas'));
     }
-    // public function create()
-    // {
-    //     return view('presensi.admin.create');
-    // }
 
     public function store(Request $request)
     {
@@ -43,8 +39,8 @@ class ApelController extends Controller
             'kelas_ids' => 'required|array', 
             'kelas_ids.*' => 'exists:kelas,id',
             // Pastikan name di input HTML adalah array: name="spd_nas[]"
-            'spd_nas'   => 'nullable|array', 
-            'spd_nas.*' => 'exists:spd,nas', // Memastikan NAS yang diinput benar-benar ada
+            //'spd_nas'   => 'nullable|array', 
+            //'spd_nas.*' => 'exists:spd,nas', // Memastikan NAS yang diinput benar-benar ada
         ]);
 
         // 2. Gunakan DB Transaction untuk mencegah data tersimpan separuh jika terjadi error
@@ -62,9 +58,9 @@ class ApelController extends Controller
             $apel->kelasPeserta()->attach($request->kelas_ids);
 
             // Simpan relasi petugas jaga (Otomatis masuk ke tabel apel_petugas)
-            if ($request->has('spd_nas')) {
-                $apel->petugasSpd()->attach($request->spd_nas);
-            }
+            // if ($request->has('spd_nas')) {
+            //     $apel->petugasSpd()->attach($request->spd_nas);
+            // }
 
             DB::commit();
             return redirect()->route('apel.index')->with('success', 'Jadwal Apel dan Penugasan berhasil dibuat!');
@@ -79,7 +75,7 @@ class ApelController extends Controller
     // Menampilkan halaman Edit
     public function edit($id)
     {
-        $apel = Apel::with(['kelasPeserta', 'petugasSpd'])->findOrFail($id);
+        $apel = Apel::with(['kelasPeserta'])->findOrFail($id);
         
         // Pengecekan Waktu: Kunci jika sudah H-90 menit (1.5 jam)
         $tz = 'Asia/Jakarta';
@@ -91,13 +87,13 @@ class ApelController extends Controller
         }
 
         $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
-        $petugasSpd = SPD::orderBy('nas', 'asc')->get();
+        //$petugasSpd = SPD::orderBy('nas', 'asc')->get();
 
         // Ambil array ID kelas dan NAS petugas yang sudah terpilih sebelumnya
         $selectedKelas = $apel->kelasPeserta->pluck('id')->toArray();
-        $selectedSpd = $apel->petugasSpd->pluck('nas')->toArray();
+        //$selectedSpd = $apel->petugasSpd->pluck('nas')->toArray();
 
-        return view('presensi.admin.edit', compact('apel', 'kelas', 'petugasSpd', 'selectedKelas', 'selectedSpd'));
+        return view('presensi.admin.edit', compact('apel', 'kelas', 'selectedKelas'));
     }
 
     // Menyimpan perubahan ke Database
@@ -109,8 +105,8 @@ class ApelController extends Controller
             'waktu_apel'   => 'required',
             'kelas_ids'    => 'required|array',
             'kelas_ids.*'  => 'exists:kelas,id',
-            'spd_nas'      => 'nullable|array',
-            'spd_nas.*'    => 'exists:spd,nas',
+            //'spd_nas'      => 'nullable|array',
+            //'spd_nas.*'    => 'exists:spd,nas',
         ]);
 
         DB::beginTransaction();
@@ -135,12 +131,12 @@ class ApelController extends Controller
             $apel->kelasPeserta()->sync($request->kelas_ids);
 
             // 3. Sinkronisasi relasi petugas jaga
-            if ($request->has('spd_nas')) {
-                $apel->petugasSpd()->sync($request->spd_nas);
-            } else {
-                // Jika tidak ada petugas yang dipilih, kosongkan relasinya
-                $apel->petugasSpd()->sync([]); 
-            }
+            // if ($request->has('spd_nas')) {
+            //     $apel->petugasSpd()->sync($request->spd_nas);
+            // } else {
+            //     // Jika tidak ada petugas yang dipilih, kosongkan relasinya
+            //     $apel->petugasSpd()->sync([]); 
+            // }
 
             DB::commit();
             return redirect()->route('apel.index')->with('success', 'Jadwal Apel berhasil diperbarui!');

@@ -65,18 +65,6 @@
                     </select>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Satgas SPD yang Bertugas (Opsional)</label>
-                    <select class="select2-multiple shadow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        name="spd_nas[]" id="spd_nas" multiple="multiple" style="background-color: white; color: black;">
-                        @foreach($petugasSpd as $spd)
-                            <option value="{{ $spd->nas }}" {{ (collect(old('spd_nas', $selectedSpd))->contains($spd->nas)) ? 'selected' : '' }}>
-                                {{ $spd->nas }} - {{ $spd->nama_anggota }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <div class="flex justify-end gap-2">
                     <a href="{{ route('apel.index') }}" class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600">Batal</a>
                     <button type="submit" class="text-white bg-blue-700 hover:bg-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">Perbarui Jadwal</button>

@@ -87,6 +87,19 @@
                                 @endforeach
                             </select>
 
+                            <div>
+                                <select name="status" id="status"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 p-2 dark:bg-gray-700 dark:text-white"
+                                onchange="this.form.submit()">
+                                    <option value="">Semua Status</option>
+                                    <option value="hadir" {{ request('status') == 'hadir' ? 'selected' : '' }}>Hadir</option>
+                                    <option value="tidak_hadir" {{ request('status') == 'tidak_hadir' ? 'selected' : '' }}>Tidak Hadir (Alpa)</option>
+                                    <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+                                    <option value="izin" {{ request('status') == 'izin' ? 'selected' : '' }}>Izin</option>
+                                    <option value="sakit" {{ request('status') == 'sakit' ? 'selected' : '' }}>Sakit</option>
+                                </select>
+                            </div>
+
                             {{-- Dropdown Pilih Tingkat --}} {{--
                             <select id="tingkat-filter" name="tingkat"
                                 class="text-gray-500 bg-white border border-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm p-2 dark:bg-gray-800 dark:text-white"

@@ -24,15 +24,15 @@ class PresensiController extends Controller
             'status_manual' => 'nullable|in:hadir,terlambat', // Opsi untuk petugas override status
         ]);
 
-        $apel = Apel::with(['kelasPeserta', 'petugasSpd'])->findOrFail($apel_id);
+        $apel = Apel::with(['kelasPeserta'])->findOrFail($apel_id);
         $mahasiswa = Mahasiswa::where('nim', $request->nim)->first();
 
         // 1. Validasi apakah mahasiswa ini adalah peserta apel (dari kelas terpilih) ATAU petugas SPD
         $isPeserta = $apel->kelasPeserta->contains('id', $mahasiswa->kelas_id);
-        $isPetugas = $apel->petugasSpd->contains('nas', $mahasiswa->nim); // Asumsi NIM = NAS untuk petugas
+        //$isPetugas = $apel->petugasSpd->contains('nas', $mahasiswa->nim); // Asumsi NIM = NAS untuk petugas
 
-        if (!$isPeserta && !$isPetugas) {
-            return response()->json(['status' => 'error', 'message' => 'Mahasiswa/Petugas ini tidak ditugaskan pada apel ini.'], 403);
+        if (!$isPeserta) {
+            return response()->json(['status' => 'error', 'message' => 'Mahasiswa tidak ditugaskan pada apel ini.'], 403);
         }
 
         // 2. Cek apakah sudah presensi
@@ -146,9 +146,20 @@ class PresensiController extends Controller
             );
 
         // Filter Tambahan
-        if ($request->filled('tingkat')) {
-            $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$request->tingkat]);
+        // if ($request->filled('tingkat')) {
+        //     $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$request->tingkat]);
+        // }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'tidak_hadir') {
+                // Jika tidak hadir, berarti data presensinya kosong (NULL)
+                $query->whereNull('presensi.status');
+            } else {
+                // Untuk status lainnya (hadir, terlambat, izin, sakit)
+                $query->where('presensi.status', $request->status);
+            }
         }
+
         if ($request->filled('nama')) {
             $query->where(function($q) use ($request) {
                 $q->where('mahasiswas.nama', 'like', '%' . $request->nama . '%')
@@ -201,6 +212,14 @@ class PresensiController extends Controller
         // Filter Tingkat
         if ($request->filled('tingkat')) {
             $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$request->tingkat]);
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'tidak_hadir') {
+                $query->whereNull('presensi.status');
+            } else {
+                $query->where('presensi.status', $request->status);
+            }
         }
 
         // Opsional: Ikutkan pencarian nama jika kamu ingin hasil export sama dengan hasil search

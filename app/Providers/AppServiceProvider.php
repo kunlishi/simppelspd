@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->environment('local')) {
             // Ganti dengan alamat emailmu sendiri
-            Mail::alwaysTo('email.testing.aikunlishi25@gmail.com'); 
+            Mail::alwaysTo('aikunlishi25@gmail.com'); 
         }
     }
 }

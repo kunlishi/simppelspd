@@ -28,9 +28,4 @@ class Presensi extends Model
     {
         return $this->belongsTo(Mahasiswa::class, 'nim', 'nim');
     }
-
-    public function petugasSpd()
-    {
-        return $this->belongsTo(SPD::class, 'petugas_nas', 'nas');
-    }
 }
