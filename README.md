@@ -1,6 +1,3 @@
-## Tentang SIMPPEL SPD
-SIMPPEL adalah sistem berbasis Laravel yang digunakan oleh SPD untuk mencatat dan melaporkan pelanggaran yang dilakukan oleh mahasiswa di STIS, baik saat operasi rutin (apel), operasi umum (sidak), maupun pelanggaran harian. Sistem ini membantu SPD dalam mengelola data pelanggaran, membuat laporan, dan memberikan informasi yang akurat serta transparan. Selain SPD, pihak-pihak seperti BAAK, UPK, dan Koordinator Keamanan dapat melihat laporan pelanggaran yang dibuat mahasiswa pada website ini. Mahasiswa sebagai tamu yang tidak perlu login dapat melihat peraturan, FAQ, serta mengirim saran kepada SPD baik secara anonim maupun tidak.
-
 ## Dokumen Terkait
 * [Laporan Milestone 4]()
 * [Buku Manual Penggunaan]()
@@ -33,6 +30,12 @@ php artisan db:seed --class=DummySeederMahasiswa
 php artisan db:seed --class=PelanggaranSeeder
 php artisan db:seed --class=PemonitorSeeder
 php artisan db:seed --class=SPDSeeder
+```
+
+Pada terminal baru jalankan
+```
+php artisan queue:work
+
 ```
 
 ## Struktur Proyek

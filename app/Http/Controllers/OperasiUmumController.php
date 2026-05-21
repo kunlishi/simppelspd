@@ -23,6 +23,7 @@ class OperasiUmumController extends Controller
             $join->on('operasi_umums.nim', '=', 'mahasiswas.nim')
                 ->on('operasi_umums.tahun_akademik', '=', 'mahasiswas.tahun_akademik');
         })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas untuk mendapatkan nama kelas
             ->join('pelanggarans', 'operasi_umums.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke tabel pelanggarans
             ->where('operasi_umums.status_pelanggaran', '!=', 'Dibatalkan') // Filter status "Dibatalkan"
             ->select(
@@ -31,7 +32,7 @@ class OperasiUmumController extends Controller
                 'operasi_umums.updated_at',
                 'operasi_umums.nim',
                 'mahasiswas.nama',
-                'mahasiswas.kelas',
+                'kelas.nama_kelas as kelas',
                 'pelanggarans.namaPelanggaran as pelanggaran', // Mengambil namaPelanggaran dari tabel pelanggarans
                 'operasi_umums.nama_pencatat',
                 'operasi_umums.status_pelanggaran',
@@ -108,13 +109,14 @@ class OperasiUmumController extends Controller
         $operasiUmum = OperasiUmum::select(
             'operasi_umums.*',
             'mahasiswas.nama',
-            'mahasiswas.kelas',
+            'kelas.nama_kelas as kelas',
             'pelanggarans.namaPelanggaran as pelanggaran' // Ambil nama pelanggaran dari tabel pelanggarans
         )
             ->join('mahasiswas', function ($join) {
                 $join->on('operasi_umums.nim', '=', 'mahasiswas.nim')
                     ->on('operasi_umums.tahun_akademik', '=', 'mahasiswas.tahun_akademik'); // Join berdasarkan NIM dan tahun akademik
             })
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id') // Join ke tabel kelas untuk mendapatkan nama kelas
             ->leftJoin('pelanggarans', 'operasi_umums.pelanggaran', '=', 'pelanggarans.kodePelanggaran') // Join ke pelanggarans untuk mendapatkan nama pelanggaran
             ->where('operasi_umums.id', $id) // Filter berdasarkan ID operasi_umums
             ->firstOrFail();
@@ -232,7 +234,7 @@ class OperasiUmumController extends Controller
 
         // Filter berdasarkan tingkat (mengambil inisial kelas)
         if ($request->filled('tingkat')) {
-            $query->whereRaw('LEFT(mahasiswas.kelas, 1) = ?', [$request->tingkat]);
+            $query->whereRaw('LEFT(kelas.nama_kelas, 1) = ?', [$request->tingkat]);
         }
 
         // Filter berdasarkan nama mahasiswa
@@ -247,7 +249,7 @@ class OperasiUmumController extends Controller
             'operasi_umums.updated_at',
             'operasi_umums.nim',
             'mahasiswas.nama',
-            'mahasiswas.kelas',
+            'kelas.nama_kelas as kelas',
             'pelanggarans.namaPelanggaran as pelanggaran', // Mengambil namaPelanggaran dari tabel pelanggarans
             'operasi_umums.nama_pencatat',
             'operasi_umums.status_pelanggaran',
@@ -272,10 +274,11 @@ class OperasiUmumController extends Controller
             ->where('operasi_umums.status_pelanggaran', '!=', 'Dibatalkan') // Abaikan data dengan status "Dibatalkan"
             ->select(
                 'operasi_umums.*',
-                'mahasiswas.kelas',
+                'kelas.nama_kelas as kelas',
                 'mahasiswas.nama',
                 'pelanggarans.namaPelanggaran as pelanggaran' // Ambil nama pelanggaran
-            );
+            )
+            ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id'); // Join ke tabel kelas untuk mendapatkan nama kelas
 
         // Terapkan filter tanggal jika ada
         if (!empty($tanggal)) {

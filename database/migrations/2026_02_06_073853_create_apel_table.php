@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('spd', function (Blueprint $table) {
-            $table->string('nas')-> unique();
-            $table->string('nama_anggota');
+        Schema::create('apel', function (Blueprint $table) {
+            $table->id();
+            $table->string("nama_apel");
+            $table->date("tanggal_apel");
+            $table->time("waktu_apel");
             $table->timestamps();
         });
     }
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('spd');
+        Schema::dropIfExists('apel');
     }
 };

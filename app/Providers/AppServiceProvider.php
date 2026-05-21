@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use Carbon\Carbon;
 use App\Models\KritikSaran;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        \URL::forceScheme('https');
+        URL::forceScheme('https');
 
         // Daftarkan file routes/api.php
         Route::prefix('api') // Prefix 'api' untuk semua route di api.php
@@ -40,5 +42,10 @@ class AppServiceProvider extends ServiceProvider
 
         Carbon::setLocale('id'); // Mengatur lokal Carbon ke bahasa Indonesia
         setlocale(LC_TIME, 'id_ID');
+
+        if ($this->app->environment('local')) {
+            // Ganti dengan alamat emailmu sendiri
+            Mail::alwaysTo('aikunlishi25@gmail.com'); 
+        }
     }
 }

@@ -46,7 +46,7 @@
                             </svg>
                         </button>
                         <ul id="dropdown-pencatatan"
-                            class="{{ request()->is('catat-rutin', 'catat-umum', 'catat-harian') ? '' : 'hidden' }} py-2 space-y-2">
+                            class="{{ request()->is('catat-rutin', 'catat-umum', 'catat-harian', 'presensi') ? '' : 'hidden' }} py-2 space-y-2">
                             <li>
                                 <x-sidebarcomp href="/catat-rutin" :active="request()->is('catat-rutin')">Operasi Rutin</x-sidebarcomp>
                             </li>
@@ -55,6 +55,9 @@
                             </li>
                             <li>
                                 <x-sidebarcomp href="/catat-harian" :active="request()->is('catat-harian')">Penindakan Harian</x-sidebarcomp>
+                            </li>
+                            <li>
+                                <x-sidebarcomp href="/presensi" :active="request()->is('presensi')">Presensi Apel</x-sidebarcomp>
                             </li>
                         </ul>
                     </li>
@@ -79,7 +82,7 @@
                             </svg>
                         </button>
                         <ul id="dropdown-pelaporan"
-                            class="{{ request()->fullUrlIs('*/laporan-rutin*') || request()->fullUrlIs('*/laporan-umum*') || request()->fullUrlIs('*/laporan-harian*') ? '' : 'hidden' }}  py-2 space-y-2">
+                            class="{{ request()->fullUrlIs('*/laporan-rutin*') || request()->fullUrlIs('*/laporan-umum*') || request()->fullUrlIs('*/laporan-harian*') || request()->is('presensi/spd-report') ? '' : 'hidden' }}  py-2 space-y-2">
                             <li>
                                 <x-sidebarcomp href="{{ route('laporanrutin') }}" :active="request()->fullUrlIs('*/laporan-rutin*')">Operasi
                                     Rutin</x-sidebarcomp>
@@ -94,38 +97,21 @@
                                         Harian</x-sidebarcomp>
                                 </li>
                             @endif
+                            <li>
+                                <x-sidebarcomp href="/presensi/spd-report" :active="request()->is('presensi/spd-report')">Laporan Apel</x-sidebarcomp>
+                            </li>
                         </ul>
                     </li>
                 @endif
 
-                @if (Auth::user()->role == 'spd')
-                    <li style="color: white">
-                        <x-sidebarlink href="/enter-token" :active="request()->is('enter-token')"
-                            icon='
-                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                        viewBox="0 0 24 24">
-                        <path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    '>
-                            Klaim Pelanggaran
-                        </x-sidebarlink>
-                    </li>
-                @endif
-
                 @if (Auth::user()->role == 'admin')
-                    <li style="color: white">
-                        <x-sidebarlink href="/buat-token" :active="request()->is('buat-token')"
-                            icon='
-                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 12A2.5 2.5 0 0 1 21 9.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v2.5a2.5 2.5 0 0 1 0 5V17a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-</svg>
-
-                    '>
-                            Buat Token
-                        </x-sidebarlink>
-                    </li>
+                <li style = "color: white">
+                    <x-sidebarlink href="/daftar-apel" :active="request()->is('daftar-apel')"
+                        icon='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'>
+                        Daftar Apel
+                    </x-sidebarlink>   
+                </li>    
+                
                     <li style="color: white">
                         <x-sidebarlink href="/admin-faq" :active="request()->is('admin-faq')"
                             icon='

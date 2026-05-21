@@ -65,11 +65,12 @@ class DashboardController extends Controller
         foreach ($tables as $table) {
             $query = DB::table($table)
                 ->join('mahasiswas', "{$table}.nim", '=', 'mahasiswas.nim') // Join tabel mahasiswa berdasarkan nim
-                ->select(DB::raw('LEFT(mahasiswas.kelas, 1) as tingkat'), DB::raw('COUNT(*) as total')) // Ambil inisial kelas sebagai tingkat
+                ->join('kelas', 'mahasiswas.kelas_id', '=', 'kelas.id')
+                ->select(DB::raw('LEFT(kelas.nama_kelas, 1) as tingkat'), DB::raw('COUNT(*) as total')) // Ambil inisial kelas sebagai tingkat
                 ->when($timeConstraint, function ($q) use ($timeConstraint) {
                     return $q->where(...$timeConstraint); // Terapkan filter waktu jika ada
                 })
-                ->groupBy(DB::raw('LEFT(mahasiswas.kelas, 1)')); // Grouping berdasarkan inisial kelas
+                ->groupBy(DB::raw('LEFT(kelas.nama_kelas, 1)')); // Grouping berdasarkan inisial kelas
             $pieChartDataQueries[] = $query;
         }
 

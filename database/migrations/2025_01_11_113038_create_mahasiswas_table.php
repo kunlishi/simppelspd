@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mahasiswas', function (Blueprint $table) {
-            $table->string('nim');
+            $table->string('nim')-> unique();
             $table->string('nama');
-            $table->string('kelas');
+            $table->foreignId('kelas_id')->nullable()->constrained('kelas')->onDelete('set null');
             $table->string('tahun_akademik');
             $table->timestamps();
         });
